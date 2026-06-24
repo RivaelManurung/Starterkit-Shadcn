@@ -15,14 +15,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { usePostStore } from "@/store/post-store"
+import { usePostStore } from "@/stores/post-store"
 import { truncate, formatDate } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 
 export function TopPostsTable() {
-  const getStats = usePostStore(state => state.getStats)
-  const { recentPosts } = getStats()
+  const stats = null
+  const recentPosts = usePostStore(state => state.posts).slice(0, 5)
 
   return (
     <Card className="h-full flex flex-col">
@@ -45,12 +45,12 @@ export function TopPostsTable() {
                 recentPosts.map((post) => (
                   <TableRow key={post.id}>
                     <TableCell className="font-medium">
-                      <Link href={`/posts/${post.id}`} className="hover:underline">
+                      <Link href={`/dashboard/posts/${post.id}`} className="hover:underline">
                         {truncate(post.title, 40)}
                       </Link>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={post.status === 'PUBLISHED' ? 'default' : 'secondary'} className="text-[10px]">
+                      <Badge variant={post.status === 'published' ? 'default' : 'secondary'} className="text-[10px]">
                         {post.status}
                       </Badge>
                     </TableCell>

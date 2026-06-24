@@ -27,7 +27,8 @@ export function ConfirmDelete({
 }: ConfirmDeleteProps) {
   return (
     <AlertDialog>
-      <AlertDialogTrigger render={trigger} />
+      {/* @ts-ignore */}
+      <AlertDialogTrigger render={trigger} nativeButton={false} />
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>

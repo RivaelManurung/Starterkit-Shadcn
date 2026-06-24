@@ -29,10 +29,10 @@ export function StatusDonut() {
   const data = useMemo(() => {
     let pub = 0, drf = 0, arc = 0, sch = 0
     posts.forEach(p => {
-      if (p.status === 'PUBLISHED') pub++
-      else if (p.status === 'DRAFT') drf++
-      else if (p.status === 'ARCHIVED') arc++
-      else if (p.status === 'SCHEDULED') sch++
+      if (p.status === "published") pub++
+      else if (p.status === "draft") drf++
+      else if (p.status === "archived") arc++
+      else if (p.status === "scheduled") sch++
     })
 
     return [

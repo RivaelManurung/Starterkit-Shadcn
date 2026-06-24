@@ -1,13 +1,13 @@
 "use client"
 
 import { useEffect } from "react"
-import { usePostStore } from "@/store/post-store"
-import { useActivityStore } from "@/store/activity-store"
-import { useCategoryStore } from "@/store/category-store"
-import { useNotificationStore } from "@/store/notification-store"
-import { useSettingsStore } from "@/store/settings-store"
-import { useTagStore } from "@/store/tag-store"
-import { useUserStore } from "@/store/user-store"
+import { usePostStore } from "@/stores/post-store"
+import { useActivityStore } from "@/stores/activity-store"
+import { useCategoryStore } from "@/stores/category-store"
+import { useNotificationStore } from "@/stores/notification-store"
+import { useSettingsStore } from "@/stores/settings-store"
+import { useTagStore } from "@/stores/tag-store"
+import { useUserStore } from "@/stores/user-store"
 
 /**
  * Rehydrates all Zustand persist stores from localStorage after mount.

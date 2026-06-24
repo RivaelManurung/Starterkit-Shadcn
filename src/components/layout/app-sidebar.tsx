@@ -1,166 +1,164 @@
 "use client"
 
+import * as React from "react"
+import { usePathname } from "next/navigation"
+import Link from "next/link"
+import { 
+  LayoutDashboard, 
+  FileText, 
+  FolderTree, 
+  Tags, 
+  Users, 
+  Bell, 
+  Activity,
+  BarChart3,
+  Settings,
+  HelpCircle,
+  LogOut
+} from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuBadge,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarGroupContent,
+  useSidebar
 } from "@/components/ui/sidebar"
-import {
-  LayoutDashboard,
-  BarChart2,
-  FileText,
-  FolderOpen,
-  Tag,
-  Users,
-  Bell,
-  Activity,
-  Settings,
-  HelpCircle,
-  LogOut,
-  Command,
-} from "lucide-react"
-import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
-import { usePostStore } from "@/store/post-store"
-import { useNotificationStore } from "@/store/notification-store"
-import { useSettingsStore } from "@/store/settings-store"
-import { useActivityStore } from "@/store/activity-store"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useAuthStore } from "@/stores/auth-store"
+import { useNotificationStore } from "@/stores/notification-store"
+import { usePermission } from "@/lib/rbac"
 
 export function AppSidebar() {
   const pathname = usePathname()
-  const router = useRouter()
+  const currentUser = useAuthStore(state => state.currentUser)
+  const logout = useAuthStore(state => state.logout)
+  const unreadCount = useNotificationStore(state => state.unreadCount)
+  const { state, isMobile } = useSidebar()
+  const [mounted, setMounted] = React.useState(false)
   
-  const draftPosts = usePostStore(state => state.posts.filter(p => p.status === 'DRAFT').length)
-  const unreadNotifs = useNotificationStore(state => state.getUnreadCount())
-  const currentUser = useSettingsStore(state => state.getCurrentUser())
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+  
+  // Permission checks
+  const canReadUsers = usePermission("users:read")
+  const canReadLogs = usePermission("logs:read")
+  const canReadSettings = usePermission("settings:read")
+  const canReadAnalytics = usePermission("analytics:read")
 
-  const handleLogout = () => {
-    if (currentUser) {
-      useActivityStore.getState().addLog({
-        action: 'LOGOUT',
-        userId: currentUser.id,
-        entityId: currentUser.id,
-        entityType: 'User',
-        entityTitle: currentUser.name,
-      })
-    }
-    router.push('/sign-in')
-  }
+  if (!currentUser) return null
 
-  const navGroups = [
-    {
-      label: "Menu Utama",
-      items: [
-        { title: "Overview", icon: LayoutDashboard, url: "/overview" },
-        { title: "Analitik", icon: BarChart2, url: "/analytics" },
-      ],
-    },
-    {
-      label: "Konten",
-      items: [
-        { title: "Artikel", icon: FileText, url: "/posts", badge: draftPosts > 0 ? draftPosts : undefined },
-        { title: "Kategori", icon: FolderOpen, url: "/categories" },
-        { title: "Tag", icon: Tag, url: "/tags" },
-      ],
-    },
-    {
-      label: "Manajemen",
-      items: [
-        { title: "Pengguna", icon: Users, url: "/users" },
-        { title: "Notifikasi", icon: Bell, url: "/notifications", badge: unreadNotifs > 0 ? unreadNotifs : undefined },
-        { title: "Log Aktivitas", icon: Activity, url: "/activity" },
-      ],
-    },
-    {
-      label: "Sistem",
-      items: [
-        { title: "Pengaturan", icon: Settings, url: "/settings/profile" },
-        { title: "Bantuan", icon: HelpCircle, url: "#", disabled: true },
-      ],
-    },
+  const mainNav: { title: string, url: string, icon: any, permission: boolean, badge?: number | null }[] = [
+    { title: "Overview", url: "/dashboard", icon: LayoutDashboard, permission: true },
+    { title: "Analitik", url: "/dashboard/analytics", icon: BarChart3, permission: canReadAnalytics },
   ]
+  
+  const contentNav: { title: string, url: string, icon: any, permission: boolean, badge?: number | null }[] = [
+    { title: "Artikel", url: "/dashboard/posts", icon: FileText, permission: true },
+    { title: "Kategori", url: "/dashboard/categories", icon: FolderTree, permission: true },
+    { title: "Tag", url: "/dashboard/tags", icon: Tags, permission: true },
+  ]
+  
+  const systemNav: { title: string, url: string, icon: any, permission: boolean, badge?: number | null }[] = [
+    { title: "Pengguna", url: "/dashboard/users", icon: Users, permission: canReadUsers },
+    { title: "Notifikasi", url: "/dashboard/notifications", icon: Bell, permission: true, badge: mounted && unreadCount > 0 ? unreadCount : null },
+    { title: "Log Aktivitas", url: "/dashboard/activity", icon: Activity, permission: canReadLogs },
+  ]
+  
+  const settingsNav: { title: string, url: string, icon: any, permission: boolean, badge?: number | null }[] = [
+    { title: "Pengaturan", url: "/dashboard/settings", icon: Settings, permission: canReadSettings },
+    { title: "Bantuan", url: "/dashboard/help", icon: HelpCircle, permission: true },
+  ]
+
+  const renderMenu = (items: { title: string, url: string, icon: any, permission: boolean, badge?: number | null }[]) => (
+    <SidebarMenu>
+      {items.filter(i => i.permission).map((item) => (
+        <SidebarMenuItem key={item.title}>
+          <SidebarMenuButton 
+            render={<Link href={item.url} />}
+            isActive={pathname === item.url || pathname.startsWith(`${item.url}/`)}
+            tooltip={item.title}
+          >
+            <item.icon />
+            <span>{item.title}</span>
+          </SidebarMenuButton>
+          {item.badge ? (
+            <SidebarMenuBadge>{item.badge > 99 ? "99+" : item.badge}</SidebarMenuBadge>
+          ) : null}
+        </SidebarMenuItem>
+      ))}
+    </SidebarMenu>
+  )
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" render={<Link href="/overview" />}>
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <Command className="size-4" />
-              </div>
-              <div className="flex flex-col gap-0.5 leading-none">
-                <span className="font-semibold">StarterKit</span>
-                <span className="text-xs text-muted-foreground">Dashboard v1.0</span>
-              </div>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+      <SidebarHeader className="h-14 flex items-center border-b px-4">
+        <Link href="/dashboard" className="flex items-center gap-2 overflow-hidden w-full font-semibold">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
+            <span className="text-xl">S</span>
+          </div>
+          {state === "expanded" && (
+            <span className="truncate">StarterKit</span>
+          )}
+        </Link>
       </SidebarHeader>
-
+      
       <SidebarContent>
-        {navGroups.map((group) => (
-          <SidebarGroup key={group.label}>
-            <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {group.items.map((item) => {
-                  const isActive = pathname.startsWith(item.url) && item.url !== "#"
-                  
-                  return (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton
-                        render={<Link href={item.url} />}
-                        isActive={isActive}
-                        tooltip={item.title}
-                        disabled={(item as any).disabled}
-                      >
-                        <item.icon />
-                        <span>{item.title}</span>
-                      </SidebarMenuButton>
-                      {(item as any).badge !== undefined && (
-                        <SidebarMenuBadge>{(item as any).badge}</SidebarMenuBadge>
-                      )}
-                    </SidebarMenuItem>
-                  )
-                })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        ))}
-      </SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Menu Utama</SidebarGroupLabel>
+          <SidebarGroupContent>
+            {renderMenu(mainNav)}
+          </SidebarGroupContent>
+        </SidebarGroup>
 
-      <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-              onClick={handleLogout}
-            >
-              <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={currentUser?.avatarUrl} alt={currentUser?.name} />
-                <AvatarFallback className="rounded-lg">
-                  {currentUser?.name.substring(0, 2).toUpperCase() || 'U'}
-                </AvatarFallback>
-              </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{currentUser?.name || 'Guest'}</span>
-                <span className="truncate text-xs text-muted-foreground">{currentUser?.role || ''}</span>
-              </div>
-              <LogOut className="ml-auto size-4 text-muted-foreground" />
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <SidebarGroup>
+          <SidebarGroupLabel>Konten</SidebarGroupLabel>
+          <SidebarGroupContent>
+            {renderMenu(contentNav)}
+          </SidebarGroupContent>
+        </SidebarGroup>
+        
+        <SidebarGroup>
+          <SidebarGroupLabel>Sistem</SidebarGroupLabel>
+          <SidebarGroupContent>
+            {renderMenu(systemNav)}
+          </SidebarGroupContent>
+        </SidebarGroup>
+        
+        <SidebarGroup className="mt-auto">
+          <SidebarGroupLabel>Akun</SidebarGroupLabel>
+          <SidebarGroupContent>
+            {renderMenu(settingsNav)}
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      
+      <SidebarFooter className="border-t p-2">
+        <div className="flex items-center gap-2 p-2">
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={currentUser.avatar || ""} />
+            <AvatarFallback>{currentUser.fullName.substring(0, 2).toUpperCase()}</AvatarFallback>
+          </Avatar>
+          {state === "expanded" && (
+            <div className="flex flex-col overflow-hidden text-sm">
+              <span className="truncate font-medium">{currentUser.fullName}</span>
+              <span className="truncate text-xs text-muted-foreground">{currentUser.role}</span>
+            </div>
+          )}
+        </div>
+        {state === "expanded" && (
+          <SidebarMenuButton onClick={logout} className="mt-2 text-destructive">
+            <LogOut />
+            <span>Logout</span>
+          </SidebarMenuButton>
+        )}
       </SidebarFooter>
     </Sidebar>
   )

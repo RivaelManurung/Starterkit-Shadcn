@@ -2,7 +2,7 @@
 
 import { Bell } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useNotificationStore } from "@/store/notification-store"
+import { useNotificationStore } from "@/stores/notification-store"
 import {
   Sheet,
   SheetContent,
@@ -17,10 +17,10 @@ import Link from "next/link"
 
 export function NotificationBell() {
   const notifications = useNotificationStore(state => state.notifications)
-  const unreadCount = useNotificationStore(state => state.getUnreadCount())
-  const markAsRead = useNotificationStore(state => state.markAsRead)
-  const markAllAsRead = useNotificationStore(state => state.markAllAsRead)
-  const clearAll = useNotificationStore(state => state.clearAll)
+  const unreadCount = useNotificationStore(state => state.unreadCount)
+  const markRead = useNotificationStore(state => state.markRead)
+  const markAllRead = useNotificationStore(state => state.markAllRead)
+  const clearNotifications = useNotificationStore(state => state.markAllRead)
 
   return (
     <Sheet>
@@ -41,10 +41,10 @@ export function NotificationBell() {
             </SheetDescription>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={markAllAsRead}>
+            <Button variant="outline" size="sm" onClick={markAllRead}>
               Tandai Semua Dibaca
             </Button>
-            <Button variant="ghost" size="sm" onClick={clearAll} className="text-destructive">
+            <Button variant="ghost" size="sm" onClick={clearNotifications} className="text-destructive">
               Hapus Semua
             </Button>
           </div>
@@ -60,7 +60,7 @@ export function NotificationBell() {
                   key={notif.id} 
                   className={`p-4 rounded-lg border ${!notif.isRead ? 'bg-muted/50 border-primary/20' : 'bg-card'} transition-colors cursor-pointer`}
                   onClick={() => {
-                    markAsRead(notif.id)
+                    markRead(notif.id)
                   }}
                 >
                   <div className="flex items-start justify-between gap-2">
@@ -79,9 +79,9 @@ export function NotificationBell() {
                       <div className="h-2 w-2 mt-1.5 rounded-full bg-primary flex-shrink-0" />
                     )}
                   </div>
-                  {notif.link && (
+                  {notif.actionUrl && (
                     <div className="mt-3">
-                      <Link href={notif.link} className="text-xs text-primary hover:underline font-medium">
+                      <Link href={notif.actionUrl} className="text-xs text-primary hover:underline font-medium">
                         Lihat Detail →
                       </Link>
                     </div>

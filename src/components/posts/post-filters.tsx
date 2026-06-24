@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { usePostStore } from "@/store/post-store"
+import { usePostStore } from "@/stores/post-store"
 import { SearchInput } from "@/components/shared/search-input"
 import { DatePickerWithRange } from "@/components/shared/date-range-picker"
 import {
@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useCategoryStore } from "@/store/category-store"
+import { useCategoryStore } from "@/stores/category-store"
 import { DateRange } from "react-day-picker"
 import { PostStatus } from "@/types"
 
@@ -20,7 +20,7 @@ export function PostFilters() {
   const setFilters = usePostStore(state => state.setFilters)
   const resetFilters = usePostStore(state => state.resetFilters)
 
-  const categories = useCategoryStore(state => state.getCategories())
+  const categories = useCategoryStore(state => state.categories)
 
   const handleDateChange = (range: DateRange | undefined) => {
     setFilters({
@@ -67,7 +67,7 @@ export function PostFilters() {
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="ALL">Semua Kategori</SelectItem>
-          {categories.map(c => (
+          {categories.map((c: any) => (
             <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
           ))}
         </SelectContent>

@@ -83,11 +83,11 @@ export function ThemeProvider({
     [theme, setTheme, resolvedTheme]
   )
 
-  // Avoid rendering with wrong theme class (prevent flash)
+  // Return children directly to prevent Next.js hydration mismatch
   if (!mounted) {
     return (
       <ThemeProviderContext.Provider value={value}>
-        <div style={{ visibility: "hidden" }}>{children}</div>
+        {children}
       </ThemeProviderContext.Provider>
     )
   }

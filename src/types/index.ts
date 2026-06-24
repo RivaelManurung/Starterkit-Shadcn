@@ -1,158 +1,301 @@
-// ─── Enums ───────────────────────────────────────────────
-
-export type PostStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED' | 'SCHEDULED';
-export type UserRole   = 'ADMIN' | 'EDITOR' | 'AUTHOR' | 'VIEWER';
-export type NotifType  = 'INFO' | 'SUCCESS' | 'WARNING' | 'ERROR';
-export type ActivityAction =
-  | 'POST_CREATED' | 'POST_UPDATED' | 'POST_DELETED' | 'POST_PUBLISHED'
-  | 'CATEGORY_CREATED' | 'CATEGORY_DELETED'
-  | 'TAG_CREATED' | 'TAG_DELETED'
-  | 'USER_CREATED' | 'USER_UPDATED' | 'USER_ROLE_CHANGED'
-  | 'SETTINGS_UPDATED' | 'LOGIN' | 'LOGOUT';
-
-// ─── Core Entities ───────────────────────────────────────
-
 export interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: UserRole;
-  avatarUrl: string;
-  bio?: string;
-  createdAt: string;
-  updatedAt: string;
-  isActive: boolean;
-  postCount: number;
+  id: string
+  email: string
+  username: string
+  fullName: string
+  avatar: string | null
+  role: Role
+  permissions: Permission[]
+  status: "active" | "suspended" | "pending" | "banned"
+  emailVerified: boolean
+  twoFactorEnabled: boolean
+  lastLoginAt: Date | null
+  lastLoginIp: string | null
+  loginCount: number
+  createdAt: Date
+  updatedAt: Date
+  profile: UserProfile
+  preferences: UserPreferences
+  metadata: Record<string, unknown>
 }
 
-export interface Category {
-  id: string;
-  name: string;
-  slug: string;
-  description?: string;
-  color: string;          // oklch hex untuk warna badge
-  icon?: string;          // nama ikon dari lucide-react
-  postCount: number;
-  createdAt: string;
-  updatedAt: string;
+export interface UserProfile {
+  bio: string | null
+  website: string | null
+  phone: string | null
+  location: string | null
+  company: string | null
+  jobTitle: string | null
+  timezone: string
+  language: "id" | "en"
+  socialLinks: SocialLinks
 }
 
-export interface Tag {
-  id: string;
-  name: string;
-  slug: string;
-  color: string;
-  postCount: number;
-  createdAt: string;
+export interface SocialLinks {
+  twitter: string | null
+  linkedin: string | null
+  github: string | null
+  instagram: string | null
+}
+
+export interface UserPreferences {
+  theme: "light" | "dark" | "system"
+  sidebarCollapsed: boolean
+  compactMode: boolean
+  dateFormat: string
+  currency: string
+  emailDigest: "daily" | "weekly" | "never"
+}
+
+export type Role = "superadmin" | "admin" | "editor" | "author" | "moderator" | "viewer"
+
+export type Permission =
+  // Posts
+  | "posts:read" | "posts:create" | "posts:update" | "posts:delete"
+  | "posts:publish" | "posts:unpublish" | "posts:schedule" | "posts:archive"
+  // Categories
+  | "categories:read" | "categories:create" | "categories:update" | "categories:delete"
+  // Tags
+  | "tags:read" | "tags:create" | "tags:update" | "tags:delete"
+  // Users
+  | "users:read" | "users:create" | "users:update" | "users:delete"
+  | "users:suspend" | "users:restore" | "users:impersonate"
+  // Roles
+  | "roles:read" | "roles:assign" | "roles:manage"
+  // Settings
+  | "settings:read" | "settings:update"
+  // Analytics
+  | "analytics:read" | "analytics:export"
+  // Activity Logs
+  | "logs:read" | "logs:export" | "logs:delete"
+  // Notifications
+  | "notifications:read" | "notifications:send" | "notifications:manage"
+  // API Keys
+  | "apikeys:read" | "apikeys:create" | "apikeys:delete"
+
+export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
+  superadmin: [
+    "posts:read", "posts:create", "posts:update", "posts:delete", "posts:publish", "posts:unpublish", "posts:schedule", "posts:archive",
+    "categories:read", "categories:create", "categories:update", "categories:delete",
+    "tags:read", "tags:create", "tags:update", "tags:delete",
+    "users:read", "users:create", "users:update", "users:delete", "users:suspend", "users:restore", "users:impersonate",
+    "roles:read", "roles:assign", "roles:manage",
+    "settings:read", "settings:update",
+    "analytics:read", "analytics:export",
+    "logs:read", "logs:export", "logs:delete",
+    "notifications:read", "notifications:send", "notifications:manage",
+    "apikeys:read", "apikeys:create", "apikeys:delete"
+  ],
+  admin: [
+    "posts:read", "posts:create", "posts:update", "posts:delete", "posts:publish", "posts:unpublish", "posts:schedule", "posts:archive",
+    "categories:read", "categories:create", "categories:update", "categories:delete",
+    "tags:read", "tags:create", "tags:update", "tags:delete",
+    "users:read", "users:create", "users:update", "users:suspend", "users:restore",
+    "roles:read", "roles:assign",
+    "settings:read", "settings:update",
+    "analytics:read", "analytics:export",
+    "logs:read", "logs:export",
+    "notifications:read", "notifications:send", "notifications:manage",
+    "apikeys:read", "apikeys:create", "apikeys:delete"
+  ],
+  editor: [
+    "posts:read", "posts:create", "posts:update", "posts:delete", "posts:publish", "posts:unpublish", "posts:schedule", "posts:archive",
+    "categories:read", "categories:create", "categories:update", "categories:delete",
+    "tags:read", "tags:create", "tags:update", "tags:delete",
+    "analytics:read",
+    "settings:read",
+    "notifications:read"
+  ],
+  author: [
+    "posts:read", "posts:create", "posts:update", "posts:delete",
+    "categories:read",
+    "tags:read", "tags:create",
+    "settings:read",
+    "notifications:read"
+  ],
+  moderator: [
+    "posts:read", "posts:update",
+    "users:read",
+    "logs:read",
+    "settings:read",
+    "notifications:read"
+  ],
+  viewer: [
+    "posts:read",
+    "categories:read",
+    "tags:read",
+    "users:read",
+    "settings:read",
+    "analytics:read",
+    "notifications:read"
+  ],
 }
 
 export interface Post {
-  id: string;
-  title: string;
-  slug: string;
-  content: string;
-  excerpt: string;
-  featuredImage?: string;
-  status: PostStatus;
-  publishedAt?: string;
-  scheduledAt?: string;  // untuk status SCHEDULED
-  categoryId: string;
-  category?: Category;
-  tagIds: string[];
-  tags?: Tag[];
-  authorId: string;
-  author?: User;
-  viewCount: number;
-  readingTimeMin: number; // estimasi waktu baca (menit)
-  seoTitle?: string;
-  seoDescription?: string;
-  createdAt: string;
-  updatedAt: string;
+  id: string
+  title: string
+  slug: string
+  excerpt: string | null
+  content: string  // HTML dari Tiptap
+  coverImage: string | null
+  coverImageAlt: string | null
+  status: "draft" | "published" | "scheduled" | "archived" | "under_review"
+  visibility: "public" | "private" | "password_protected" | "members_only"
+  password: string | null
+  authorId: string
+  author: User
+  coAuthors: User[]
+  categoryId: string | null
+  category: Category | null
+  tags: Tag[]
+  seo: PostSEO
+  readingTime: number  // dalam menit
+  wordCount: number
+  viewCount: number
+  likeCount: number
+  commentCount: number
+  shareCount: number
+  isFeatured: boolean
+  isPinned: boolean
+  allowComments: boolean
+  allowReactions: boolean
+  scheduledAt: Date | null
+  publishedAt: Date | null
+  archivedAt: Date | null
+  createdAt: Date
+  updatedAt: Date
+  version: number
+  revisions: PostRevision[]
+  customFields: Record<string, string>
+}
+
+export interface PostSEO {
+  metaTitle: string | null
+  metaDescription: string | null
+  focusKeyword: string | null
+  canonicalUrl: string | null
+  ogTitle: string | null
+  ogDescription: string | null
+  ogImage: string | null
+  twitterTitle: string | null
+  twitterDescription: string | null
+  twitterImage: string | null
+  noIndex: boolean
+  noFollow: boolean
+  schema: string | null
+}
+
+export interface PostRevision {
+  id: string
+  postId: string
+  title: string
+  content: string
+  savedBy: User
+  savedAt: Date
+  changeNote: string | null
+}
+
+export interface Category {
+  id: string
+  name: string
+  slug: string
+  description: string | null
+  coverImage: string | null
+  parentId: string | null
+  parent: Category | null
+  children: Category[]
+  postCount: number
+  order: number
+  isVisible: boolean
+  seo: CategorySEO
+  color: string | null
+  icon: string | null
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface CategorySEO {
+  metaTitle: string | null
+  metaDescription: string | null
+  canonicalUrl: string | null
+}
+
+export interface Tag {
+  id: string
+  name: string
+  slug: string
+  description: string | null
+  color: string
+  postCount: number
+  createdAt: Date
+  updatedAt: Date
 }
 
 export interface Notification {
-  id: string;
-  type: NotifType;
-  title: string;
-  message: string;
-  isRead: boolean;
-  link?: string;          // route yang dituju saat notif diklik
-  relatedEntityId?: string;
-  createdAt: string;
+  id: string
+  type: NotificationType
+  priority: "low" | "normal" | "high" | "critical"
+  title: string
+  message: string
+  actionLabel: string | null
+  actionUrl: string | null
+  icon: string | null
+  imageUrl: string | null
+  isRead: boolean
+  isArchived: boolean
+  isPinned: boolean
+  recipientId: string
+  senderId: string | null
+  sender: User | null
+  channel: "in_app" | "email" | "push"
+  metadata: Record<string, unknown>
+  readAt: Date | null
+  createdAt: Date
+  expiresAt: Date | null
 }
+
+export type NotificationType =
+  | "post_published" | "post_scheduled" | "post_under_review"
+  | "comment_new" | "comment_reply" | "comment_approved" | "comment_rejected"
+  | "user_registered" | "user_suspended" | "user_role_changed"
+  | "system_update" | "system_maintenance" | "system_error" | "system_warning"
+  | "security_login" | "security_password_changed" | "security_2fa_enabled"
+  | "mention" | "reaction" | "share"
+  | "analytics_milestone" | "analytics_anomaly"
 
 export interface ActivityLog {
-  id: string;
-  action: ActivityAction;
-  userId: string;
-  user?: User;
-  entityId: string;
-  entityType: 'Post' | 'Category' | 'Tag' | 'User' | 'Settings';
-  entityTitle: string;
-  meta?: Record<string, unknown>; // perubahan sebelum/sesudah
-  timestamp: string;
+  id: string
+  action: ActivityAction
+  entity: ActivityEntity
+  entityId: string
+  entityTitle: string
+  description: string
+  oldValue: Record<string, unknown> | null
+  newValue: Record<string, unknown> | null
+  userId: string
+  user: User
+  ipAddress: string
+  userAgent: string
+  sessionId: string
+  duration: number | null  // ms
+  status: "success" | "failed" | "partial"
+  metadata: Record<string, unknown>
+  createdAt: Date
 }
 
-export interface DailyAnalytics {
-  date: string;          // ISO date string
-  views: number;
-  visitors: number;
-  newPosts: number;
-  engagementRate: number;
-  sources: {
-    direct: number;
-    social: number;
-    search: number;
-    referral: number;
-  };
-}
+export type ActivityAction =
+  | "create" | "update" | "delete" | "view" | "export" | "import"
+  | "publish" | "unpublish" | "archive" | "restore" | "duplicate"
+  | "login" | "logout" | "login_failed"
+  | "password_change" | "email_change" | "role_change"
+  | "suspend" | "unsuspend" | "ban"
+  | "settings_update" | "apikey_create" | "apikey_delete"
+  | "bulk_delete" | "bulk_update" | "bulk_export"
 
-// ─── Store / Filter Types ─────────────────────────────────
+export type ActivityEntity =
+  | "post" | "category" | "tag" | "user" | "role"
+  | "settings" | "apikey" | "notification" | "comment"
+  | "session" | "system"
 
-export interface PostFilters {
-  search: string;
-  status: PostStatus | 'ALL';
-  categoryId: string | null;
-  tagIds: string[];
-  authorId: string | null;
-  dateFrom: string | null;
-  dateTo: string | null;
-  sort: 'newest' | 'oldest' | 'most-viewed' | 'alphabetical';
-  page: number;
-  limit: number;
-}
-
-export interface PaginatedResult<T> {
-  data: T[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-  hasNextPage: boolean;
-  hasPrevPage: boolean;
-}
-
-export interface AppSettings {
-  siteName: string;
-  siteDescription: string;
-  defaultPostStatus: PostStatus;
-  postsPerPage: number;
-  currentUserId: string;  // user yang sedang "login"
-  theme: 'light' | 'dark' | 'system';
-}
-
-export interface DashboardStats {
-  totalPosts: number;
-  publishedPosts: number;
-  draftPosts: number;
-  archivedPosts: number;
-  scheduledPosts: number;
-  totalViews: number;
-  totalCategories: number;
-  totalTags: number;
-  totalUsers: number;
-  viewsTrend: number;      // persentase perubahan vs 7 hari lalu
-  postsTrend: number;
-  recentPosts: Post[];
-  topPosts: Post[];         // top 5 by viewCount
-}
+export type PostStatus = Post["status"];
+export interface PaginatedResult<T> { data: T[]; total: number; page: number; pageSize: number; totalPages: number; hasNextPage: boolean; hasPrevPage: boolean; }

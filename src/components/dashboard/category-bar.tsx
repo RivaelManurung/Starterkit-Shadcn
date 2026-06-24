@@ -13,7 +13,7 @@ import {
   ChartContainer,
   ChartTooltipContent,
 } from "@/components/ui/chart"
-import { useCategoryStore } from "@/store/category-store"
+import { useCategoryStore } from "@/stores/category-store"
 import { useMemo } from "react"
 
 const chartConfig = {
@@ -24,10 +24,10 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export function CategoryBar() {
-  const getCategories = useCategoryStore(state => state.getCategories)
+  const categories = useCategoryStore(state => state.categories)
   
   const data = useMemo(() => {
-    const categories = getCategories()
+    // removed getCategories call
     return categories
       .sort((a, b) => b.postCount - a.postCount)
       .slice(0, 6)
@@ -35,7 +35,7 @@ export function CategoryBar() {
         name: c.name,
         posts: c.postCount,
       }))
-  }, [getCategories])
+  }, [categories])
 
   return (
     <Card className="h-full flex flex-col">

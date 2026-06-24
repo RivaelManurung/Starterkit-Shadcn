@@ -18,6 +18,11 @@ export function SearchInput({
   const [value, setValue] = React.useState(props.defaultValue || "")
   const [debouncedValue, setDebouncedValue] = React.useState(value)
 
+  const onSearchRef = React.useRef(onSearch)
+  React.useEffect(() => {
+    onSearchRef.current = onSearch
+  }, [onSearch])
+
   React.useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedValue(value)
@@ -26,11 +31,16 @@ export function SearchInput({
     return () => clearTimeout(timer)
   }, [value, debounceMs])
 
+  const isInitialMount = React.useRef(true)
   React.useEffect(() => {
-    if (onSearch && typeof debouncedValue === "string") {
-      onSearch(debouncedValue)
+    if (isInitialMount.current) {
+      isInitialMount.current = false
+      return
     }
-  }, [debouncedValue, onSearch])
+    if (onSearchRef.current && typeof debouncedValue === "string") {
+      onSearchRef.current(debouncedValue)
+    }
+  }, [debouncedValue])
 
   return (
     <div className={`relative ${className || ''}`}>

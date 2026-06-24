@@ -26,12 +26,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { usePostStore } from "@/store/post-store"
-import { useCategoryStore } from "@/store/category-store"
-import { useTagStore } from "@/store/tag-store"
+import { Checkbox } from "@/components/ui/checkbox"
+import { usePostStore } from "@/stores/post-store"
+import { useCategoryStore } from "@/stores/category-store"
+import { useTagStore } from "@/stores/tag-store"
+import { useAuthStore } from "@/stores/auth-store"
 import { Post } from "@/types"
-import { useSettingsStore } from "@/store/settings-store"
-import { generateSlug } from "@/lib/mock/utils"
+import { useSettingsStore } from "@/stores/settings-store"
+const generateSlug = (str: string) => str.toLowerCase().replace(/\s+/g, "-");
 
 const formSchema = z.object({
   title: z.string().min(3, "Judul minimal 3 karakter."),
@@ -40,20 +42,24 @@ const formSchema = z.object({
   excerpt: z.string().max(200, "Excerpt maksimal 200 karakter.").optional(),
   categoryId: z.string().min(1, "Kategori wajib dipilih."),
   tagIds: z.array(z.string()),
-  status: z.enum(["PUBLISHED", "DRAFT", "ARCHIVED", "SCHEDULED"]),
+  status: z.enum(["published", "draft", "archived", "scheduled", "under_review"]),
 })
 
 interface PostFormProps {
   initialData?: Post
 }
 
+const stripHtml = (html: string) => {
+  return html.replace(/<[^>]*>?/gm, '');
+}
+
 export function PostForm({ initialData }: PostFormProps) {
   const router = useRouter()
   const createPost = usePostStore(state => state.createPost)
   const updatePost = usePostStore(state => state.updatePost)
-  const categories = useCategoryStore((state) => state.getCategories())
-  const tags = useTagStore((state) => state.getTags())
-  const currentUser = useSettingsStore((state) => state.getCurrentUser())
+  const categories = useCategoryStore((state) => state.categories)
+  const tags = useTagStore((state) => state.tags)
+  const currentUser = useAuthStore(state => state.currentUser)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -61,10 +67,10 @@ export function PostForm({ initialData }: PostFormProps) {
       ? {
           title: initialData.title,
           slug: initialData.slug,
-          content: initialData.content,
-          excerpt: initialData.excerpt || "",
-          categoryId: initialData.categoryId,
-          tagIds: initialData.tagIds,
+          content: stripHtml(initialData.content),
+          excerpt: stripHtml(initialData.excerpt || ""),
+          categoryId: initialData.categoryId || "",
+          tagIds: initialData.tags?.map(t => t.id) || [],
           status: initialData.status,
         }
       : {
@@ -74,7 +80,7 @@ export function PostForm({ initialData }: PostFormProps) {
           excerpt: "",
           categoryId: "",
           tagIds: [],
-          status: "DRAFT",
+          status: "draft",
         },
   })
 
@@ -103,14 +109,14 @@ export function PostForm({ initialData }: PostFormProps) {
       })
       toast.success("Artikel berhasil dibuat.")
     }
-    router.push("/posts")
+    router.push("/dashboard/posts")
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
             <div className="p-6 rounded-xl border bg-card">
               <div className="space-y-4">
                 <FormField
@@ -186,10 +192,10 @@ export function PostForm({ initialData }: PostFormProps) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="DRAFT">Draft</SelectItem>
-                        <SelectItem value="PUBLISHED">Published</SelectItem>
-                        <SelectItem value="SCHEDULED">Scheduled</SelectItem>
-                        <SelectItem value="ARCHIVED">Archived</SelectItem>
+                        <SelectItem value="draft">Draft</SelectItem>
+                        <SelectItem value="published">Published</SelectItem>
+                        <SelectItem value="scheduled">Scheduled</SelectItem>
+                        <SelectItem value="archived">Archived</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -235,7 +241,7 @@ export function PostForm({ initialData }: PostFormProps) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {categories.map((c) => (
+                        {categories.map((c: any) => (
                           <SelectItem key={c.id} value={c.id}>
                             {c.name}
                           </SelectItem>
@@ -258,7 +264,7 @@ export function PostForm({ initialData }: PostFormProps) {
                       <FormLabel>Tags</FormLabel>
                     </div>
                     <div className="space-y-2 max-h-[150px] overflow-y-auto">
-                      {tags.map((tag) => (
+                      {tags.map((tag: any) => (
                         <FormField
                           key={tag.id}
                           control={form.control}
@@ -270,11 +276,10 @@ export function PostForm({ initialData }: PostFormProps) {
                                 className="flex flex-row items-start space-x-3 space-y-0"
                               >
                                 <FormControl>
-                                  <input
-                                    type="checkbox"
+                                  <Checkbox
                                     checked={field.value?.includes(tag.id)}
-                                    onChange={(checked) => {
-                                      return checked.target.checked
+                                    onCheckedChange={(checked) => {
+                                      return checked
                                         ? field.onChange([...field.value, tag.id])
                                         : field.onChange(
                                             field.value?.filter(
@@ -282,7 +287,6 @@ export function PostForm({ initialData }: PostFormProps) {
                                             )
                                           )
                                     }}
-                                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
                                   />
                                 </FormControl>
                                 <FormLabel className="font-normal">

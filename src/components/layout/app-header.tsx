@@ -1,24 +1,227 @@
 "use client"
 
+import * as React from "react"
+import { useTheme } from "next-themes"
+import { 
+  Bell, 
+  Search, 
+  Moon, 
+  Sun, 
+  Menu,
+  User as UserIcon,
+  Settings,
+  LogOut,
+  HelpCircle,
+  RefreshCcw
+} from "lucide-react"
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuPortal,
+} from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar"
+import { useAuthStore } from "@/stores/auth-store"
+import { useNotificationStore } from "@/stores/notification-store"
 import { BreadcrumbNav } from "./breadcrumb-nav"
-import { ThemeToggle } from "./theme-toggle"
-import { UserMenu } from "./user-menu"
-import { NotificationBell } from "@/components/notifications/notification-bell"
-import { SidebarTrigger } from "@/components/ui/sidebar"
+import Link from "next/link"
+import { Role } from "@/types"
+
+// We will build this in a separate step
+import { SearchDialog } from "@/components/shared/search-dialog"
+
 
 export function AppHeader() {
+  const { setTheme, theme } = useTheme()
+  const [searchOpen, setSearchOpen] = React.useState(false)
+  const { isMobile } = useSidebar()
+  const [mounted, setMounted] = React.useState(false)
+  
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+  
+  const currentUser = useAuthStore(state => state.currentUser)
+  const switchRole = useAuthStore(state => state.switchRole)
+  const logout = useAuthStore(state => state.logout)
+  
+  const notifications = useNotificationStore(state => state.notifications)
+  const unreadCount = useNotificationStore(state => state.unreadCount)
+  const markRead = useNotificationStore(state => state.markRead)
+
+  if (!currentUser) return null
+
+  // Keyboard shortcut for search
+  React.useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        setSearchOpen((open) => !open)
+      }
+    }
+    document.addEventListener("keydown", down)
+    return () => document.removeEventListener("keydown", down)
+  }, [])
+
   return (
-    <header className="flex h-14 items-center gap-4 border-b bg-background px-6">
-      <SidebarTrigger className="-ml-2" />
-      <div className="flex-1">
-        <BreadcrumbNav />
-      </div>
-      <div className="flex items-center gap-2">
-        <NotificationBell />
-        <ThemeToggle />
-        <div className="mx-2 h-6 w-px bg-border" />
-        <UserMenu />
-      </div>
-    </header>
+    <>
+      <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-2 border-b bg-background px-4 shadow-sm">
+        <SidebarTrigger className="-ml-1" />
+        
+        <div className="mr-2 hidden md:flex">
+          <BreadcrumbNav />
+        </div>
+        
+        <div className="flex flex-1 items-center justify-end gap-2">
+          {/* Search Button */}
+          <Button 
+            variant="outline" 
+            className="w-full justify-start text-sm text-muted-foreground sm:pr-12 md:w-40 lg:w-64"
+            onClick={() => setSearchOpen(true)}
+          >
+            <Search className="mr-2 h-4 w-4" />
+            <span className="hidden lg:inline-flex">Cari sesuatu...</span>
+            <span className="inline-flex lg:hidden">Cari...</span>
+            <kbd className="pointer-events-none absolute right-1.5 top-1.5 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+              <span className="text-xs">⌘</span>K
+            </kbd>
+          </Button>
+
+          {/* Theme Toggle */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+            className="h-9 w-9"
+          >
+            <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+            <span className="sr-only">Toggle theme</span>
+          </Button>
+
+          {/* Notification Bell */}
+          <DropdownMenu>
+            <DropdownMenuTrigger render={<Button variant="ghost" size="icon" className="relative h-9 w-9" />}>
+              <Bell className="h-4 w-4" />
+              {mounted && unreadCount > 0 && (
+                <span className="absolute right-1.5 top-1.5 flex h-3 w-3 items-center justify-center rounded-full bg-destructive text-[9px] font-medium text-destructive-foreground">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              )}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-80">
+              <DropdownMenuLabel className="flex items-center justify-between">
+                <span>Notifikasi</span>
+                {unreadCount > 0 && (
+                  <span className="text-xs text-muted-foreground">{unreadCount} belum dibaca</span>
+                )}
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <div className="max-h-[300px] overflow-y-auto">
+                {notifications.length === 0 ? (
+                  <div className="p-4 text-center text-sm text-muted-foreground">
+                    Tidak ada notifikasi
+                  </div>
+                ) : (
+                  notifications.slice(0, 5).map((notif) => (
+                    <DropdownMenuItem 
+                      key={notif.id} 
+                      className={`flex flex-col items-start gap-1 p-3 cursor-pointer ${!notif.isRead ? 'bg-muted/50' : ''}`}
+                      onClick={() => !notif.isRead && markRead(notif.id)}
+                    >
+                      <div className="flex w-full items-center justify-between">
+                        <span className={`text-sm ${!notif.isRead ? 'font-medium' : ''}`}>{notif.title}</span>
+                        {!notif.isRead && (
+                          <span className="h-2 w-2 rounded-full bg-primary" />
+                        )}
+                      </div>
+                      <span className="text-xs text-muted-foreground line-clamp-2">{notif.message}</span>
+                    </DropdownMenuItem>
+                  ))
+                )}
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem render={<Link href="/dashboard/notifications" />} className="cursor-pointer justify-center text-center">
+                Lihat Semua Notifikasi
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* User Menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger render={<Button variant="ghost" className="relative h-9 w-9 rounded-full" />}>
+              <Avatar className="h-9 w-9">
+                <AvatarImage src={currentUser.avatar || ""} alt={currentUser.fullName} />
+                <AvatarFallback>{currentUser.fullName.substring(0, 2).toUpperCase()}</AvatarFallback>
+              </Avatar>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end">
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none">{currentUser.fullName}</p>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    {currentUser.email}
+                  </p>
+                  <div className="mt-1 flex items-center">
+                    <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                      {currentUser.role}
+                    </span>
+                  </div>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem render={<Link href="/dashboard/settings" />}>
+                <UserIcon className="mr-2 h-4 w-4" />
+                <span>Profil Saya</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem render={<Link href="/dashboard/settings" />}>
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Pengaturan</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem render={<Link href="/dashboard/help" />}>
+                <HelpCircle className="mr-2 h-4 w-4" />
+                <span>Bantuan</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              
+              {/* DEMO: Role Switcher */}
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  <RefreshCcw className="mr-2 h-4 w-4" />
+                  <span>Ganti Role (Demo)</span>
+                </DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent>
+                    <DropdownMenuItem onClick={() => switchRole("superadmin")}>Superadmin</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => switchRole("admin")}>Admin</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => switchRole("editor")}>Editor</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => switchRole("author")}>Author</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => switchRole("moderator")}>Moderator</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => switchRole("viewer")}>Viewer</DropdownMenuItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
+              
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={logout} variant="destructive">
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Logout</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </header>
+
+      {/* Global Search Dialog */}
+      <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
+    </>
   )
 }

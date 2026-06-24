@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { ThemeProvider } from "@/components/theme-provider";
-import { Toaster } from "@/components/ui/sonner";
-import { StoreHydrator } from "@/components/store-hydrator";
+import { Providers } from "@/components/layout/providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,13 +28,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-background font-sans antialiased flex flex-col`}
       >
-        <ThemeProvider defaultTheme="system">
-          <TooltipProvider delay={0}>
-            {children}
-          </TooltipProvider>
-          <StoreHydrator />
-          <Toaster position="top-right" />
-        </ThemeProvider>
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );

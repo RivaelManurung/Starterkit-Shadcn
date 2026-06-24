@@ -1,5 +1,7 @@
 "use client"
 
+import * as React from "react"
+import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
   Breadcrumb,
@@ -9,59 +11,73 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import React from "react"
-import Link from "next/link"
 
+// Map route paths to readable names
 const routeMap: Record<string, string> = {
-  overview: "Overview",
+  dashboard: "Overview",
   posts: "Artikel",
-  new: "Buat Artikel",
-  edit: "Edit",
   categories: "Kategori",
   tags: "Tag",
   users: "Pengguna",
   notifications: "Notifikasi",
-  activity: "Log Aktivitas",
-  settings: "Pengaturan",
-  profile: "Profil",
-  appearance: "Tampilan",
-  danger: "Zona Bahaya",
+  "activity-logs": "Log Aktivitas",
   analytics: "Analitik",
+  settings: "Pengaturan",
+  help: "Bantuan",
+  new: "Tambah Baru",
+  edit: "Edit",
 }
 
 export function BreadcrumbNav() {
   const pathname = usePathname()
   
-  if (pathname === '/') return null
+  // Don't render on root or just /dashboard if you want it cleaner
+  if (pathname === "/" || pathname === "/dashboard") {
+    return (
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbPage>Overview</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+    )
+  }
 
-  const segments = pathname.split('/').filter(Boolean)
+  const paths = pathname.split("/").filter(Boolean)
   
   return (
     <Breadcrumb>
       <BreadcrumbList>
-        {segments.map((segment, index) => {
-          const isLast = index === segments.length - 1
-          const href = `/${segments.slice(0, index + 1).join('/')}`
+        <BreadcrumbItem>
+          <BreadcrumbLink render={<Link href="/dashboard" />}>
+            Dashboard
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        
+        {paths.map((path, index) => {
+          if (path === "dashboard") return null // Already added above
           
-          // Try to map segment, if not mapped, it might be an ID so we display "Detail" or something
-          let label = routeMap[segment]
-          if (!label) {
-            // Assume it's a dynamic ID
-            label = "Detail"
-          }
+          const isLast = index === paths.length - 1
+          
+          // Try to get a readable name, fallback to capitalized path
+          const readableName = routeMap[path] || 
+            (path.length > 15 ? `${path.substring(0, 8)}...` : path.charAt(0).toUpperCase() + path.slice(1))
+            
+          const href = `/${paths.slice(0, index + 1).join("/")}`
 
           return (
-            <React.Fragment key={href}>
+            <React.Fragment key={path}>
+              <BreadcrumbSeparator />
               <BreadcrumbItem>
                 {isLast ? (
-                  <BreadcrumbPage>{label}</BreadcrumbPage>
+                  <BreadcrumbPage>{readableName}</BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink render={<Link href={href} />}>
-                    {label}
+                    {readableName}
                   </BreadcrumbLink>
                 )}
               </BreadcrumbItem>
-              {!isLast && <BreadcrumbSeparator />}
             </React.Fragment>
           )
         })}
