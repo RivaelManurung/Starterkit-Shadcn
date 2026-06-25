@@ -1,6 +1,6 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
-import { ActivityLog } from "@/types"
+import { ActivityLog, User } from "@/types"
 import { mockActivityLogs } from "@/lib/mock-data"
 
 interface ActivityState {
@@ -13,7 +13,7 @@ interface ActivityState {
 
 export const useActivityStore = create<ActivityState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       logs: mockActivityLogs,
       
       addLog: (logData) => set((state) => {
@@ -47,7 +47,7 @@ export const logActivity = (
   entityId: string,
   entityTitle: string,
   description: string,
-  user: any,
+  user: User | null,
   details?: {
     oldValue?: Record<string, unknown> | null,
     newValue?: Record<string, unknown> | null,

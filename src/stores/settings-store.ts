@@ -45,9 +45,9 @@ interface AppearanceSettings {
 
 interface SecuritySettings {
   twoFactorEnabled: boolean
-  trustedDevices: any[]
-  loginHistory: any[]
-  activeSessions: any[]
+  trustedDevices: Array<{ id: string; name: string; lastUsedAt: Date | null }>
+  loginHistory: Array<{ timestamp: Date; action: string; ipAddress: string }>
+  activeSessions: Array<{ id: string; startedAt: Date; ipAddress: string }>
 }
 
 interface NotificationSettings {
@@ -89,7 +89,7 @@ interface SettingsState {
 
 export const useSettingsStore = create<SettingsState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       profile: {
         avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=admin",
         fullName: "Admin Utama",

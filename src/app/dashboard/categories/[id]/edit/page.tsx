@@ -97,7 +97,7 @@ export default function EditCategoryPage() {
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   <FormField
-                    control={form.control as any}
+                    control={form.control}
                     name="name"
                     render={({ field }) => (
                       <FormItem>
@@ -110,7 +110,7 @@ export default function EditCategoryPage() {
                     )}
                   />
                   <FormField
-                    control={form.control as any}
+                    control={form.control}
                     name="slug"
                     render={({ field }) => (
                       <FormItem>
@@ -123,7 +123,7 @@ export default function EditCategoryPage() {
                     )}
                   />
                   <FormField
-                    control={form.control as any}
+                    control={form.control}
                     name="description"
                     render={({ field }) => (
                       <FormItem>
@@ -157,7 +157,7 @@ export default function EditCategoryPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <FormField
-                control={form.control as any}
+                control={form.control}
                 name="color"
                 render={({ field }) => (
                   <FormItem>
@@ -183,7 +183,7 @@ export default function EditCategoryPage() {
                 )}
               />
               <FormField
-                control={form.control as any}
+                control={form.control}
                 name="isVisible"
                 render={({ field }) => (
                   <FormItem className="flex items-center justify-between rounded-lg border p-3">

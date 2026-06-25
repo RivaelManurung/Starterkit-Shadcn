@@ -1,7 +1,7 @@
 import { PostForm } from "@/components/posts/post-form"
 import { ChevronLeft } from "lucide-react"
 import Link from "next/link"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 
 export default function NewPostPage() {
   return (

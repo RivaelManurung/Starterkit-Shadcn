@@ -25,7 +25,7 @@ interface NotificationState {
 
 export const useNotificationStore = create<NotificationState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       notifications: mockNotifications,
       unreadCount: mockNotifications.filter(n => !n.isRead).length,
       preferences: {
@@ -93,7 +93,7 @@ export const useNotificationStore = create<NotificationState>()(
       name: "notification-store",
       version: 2,
       partialize: (state) => ({ preferences: state.preferences }),
-      migrate: (persistedState: any, version: number) => {
+      migrate: () => {
         // Reset to initial state on version change
         return { preferences: { email: true, inApp: true, push: false } }
       },

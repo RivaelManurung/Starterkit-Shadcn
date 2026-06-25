@@ -40,7 +40,7 @@ export function AppSidebar() {
   const currentUser = useAuthStore(state => state.currentUser)
   const logout = useAuthStore(state => state.logout)
   const unreadCount = useNotificationStore(state => state.unreadCount)
-  const { state, isMobile } = useSidebar()
+  const { state } = useSidebar()
   const [mounted, setMounted] = React.useState(false)
   
   React.useEffect(() => {
@@ -55,29 +55,29 @@ export function AppSidebar() {
 
   if (!currentUser) return null
 
-  const mainNav: { title: string, url: string, icon: any, permission: boolean, badge?: number | null }[] = [
+  const mainNav: { title: string, url: string, icon: React.ComponentType, permission: boolean, badge?: number | null }[] = [
     { title: "Overview", url: "/dashboard", icon: LayoutDashboard, permission: true },
     { title: "Analitik", url: "/dashboard/analytics", icon: BarChart3, permission: canReadAnalytics },
   ]
   
-  const contentNav: { title: string, url: string, icon: any, permission: boolean, badge?: number | null }[] = [
+  const contentNav: { title: string, url: string, icon: React.ComponentType, permission: boolean, badge?: number | null }[] = [
     { title: "Artikel", url: "/dashboard/posts", icon: FileText, permission: true },
     { title: "Kategori", url: "/dashboard/categories", icon: FolderTree, permission: true },
     { title: "Tag", url: "/dashboard/tags", icon: Tags, permission: true },
   ]
   
-  const systemNav: { title: string, url: string, icon: any, permission: boolean, badge?: number | null }[] = [
+  const systemNav: { title: string, url: string, icon: React.ComponentType, permission: boolean, badge?: number | null }[] = [
     { title: "Pengguna", url: "/dashboard/users", icon: Users, permission: canReadUsers },
     { title: "Notifikasi", url: "/dashboard/notifications", icon: Bell, permission: true, badge: mounted && unreadCount > 0 ? unreadCount : null },
     { title: "Log Aktivitas", url: "/dashboard/activity", icon: Activity, permission: canReadLogs },
   ]
   
-  const settingsNav: { title: string, url: string, icon: any, permission: boolean, badge?: number | null }[] = [
+  const settingsNav: { title: string, url: string, icon: React.ComponentType, permission: boolean, badge?: number | null }[] = [
     { title: "Pengaturan", url: "/dashboard/settings", icon: Settings, permission: canReadSettings },
     { title: "Bantuan", url: "/dashboard/help", icon: HelpCircle, permission: true },
   ]
 
-  const renderMenu = (items: { title: string, url: string, icon: any, permission: boolean, badge?: number | null }[]) => (
+  const renderMenu = (items: { title: string, url: string, icon: React.ComponentType, permission: boolean, badge?: number | null }[]) => (
     <SidebarMenu>
       {items.filter(i => i.permission).map((item) => (
         <SidebarMenuItem key={item.title}>

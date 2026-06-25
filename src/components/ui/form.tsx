@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import * as LabelPrimitive from "@radix-ui/react-label"
 import { Slot } from "@radix-ui/react-slot"
 import {
   Controller,
@@ -66,13 +65,18 @@ FormItem.displayName = "FormItem"
 const useFormField = () => {
   const fieldContext = React.useContext(FormFieldContext)
   const itemContext = React.useContext(FormItemContext)
-  const { getFieldState, formState } = useFormContext()
+  const formContext = useFormContext()
 
-  const fieldState = getFieldState(fieldContext.name, formState)
+  if (!formContext) {
+    throw new Error("useFormField should be used within <Form>")
+  }
 
   if (!fieldContext) {
     throw new Error("useFormField should be used within <FormField>")
   }
+
+  const { getFieldState, formState } = formContext
+  const fieldState = getFieldState(fieldContext.name, formState)
 
   const { id } = itemContext
 

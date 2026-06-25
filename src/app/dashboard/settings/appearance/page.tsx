@@ -74,7 +74,7 @@ export default function SettingsAppearancePage() {
                 <FormMessage />
                 <RadioGroup
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  value={field.value}
                   className="grid max-w-md grid-cols-1 md:grid-cols-3 gap-8 pt-2"
                 >
                   <FormItem>

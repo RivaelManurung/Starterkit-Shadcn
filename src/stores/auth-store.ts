@@ -7,7 +7,7 @@ interface AuthState {
   currentUser: User | null
   isAuthenticated: boolean
   sessionStartedAt: Date | null
-  loginHistory: any[] // We can refine this later if needed
+  loginHistory: Array<{ timestamp: Date; action: string }>
   
   // Actions
   login: (user: User) => void
@@ -18,7 +18,7 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       // Default to the first user (superadmin) for demo purposes
       currentUser: mockUsers[0],
       isAuthenticated: true,

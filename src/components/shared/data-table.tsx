@@ -29,7 +29,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[]
   isLoading?: boolean
   toolbar?: React.ReactNode
-  bulkActions?: (table: any) => React.ReactNode
+  bulkActions?: (table: import("@tanstack/react-table").Table<TData>) => React.ReactNode
   pagination?: PaginatedResult<TData>
   onPageChange?: (page: number) => void
   onPageSizeChange?: (size: number) => void

@@ -31,8 +31,7 @@ import { usePostStore } from "@/stores/post-store"
 import { useCategoryStore } from "@/stores/category-store"
 import { useTagStore } from "@/stores/tag-store"
 import { useAuthStore } from "@/stores/auth-store"
-import { Post } from "@/types"
-import { useSettingsStore } from "@/stores/settings-store"
+import { Post, Category, Tag } from "@/types"
 const generateSlug = (str: string) => str.toLowerCase().replace(/\s+/g, "-");
 
 const formSchema = z.object({
@@ -241,7 +240,7 @@ export function PostForm({ initialData }: PostFormProps) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {categories.map((c: any) => (
+                        {categories.map((c: Category) => (
                           <SelectItem key={c.id} value={c.id}>
                             {c.name}
                           </SelectItem>
@@ -264,7 +263,7 @@ export function PostForm({ initialData }: PostFormProps) {
                       <FormLabel>Tags</FormLabel>
                     </div>
                     <div className="space-y-2 max-h-[150px] overflow-y-auto">
-                      {tags.map((tag: any) => (
+                        {tags.map((tag: Tag) => (
                         <FormField
                           key={tag.id}
                           control={form.control}

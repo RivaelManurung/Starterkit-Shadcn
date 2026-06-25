@@ -5,7 +5,7 @@ import { useNotificationStore } from "@/stores/notification-store"
 import { Button } from "@/components/ui/button"
 import { relativeTime } from "@/lib/utils"
 import Link from "next/link"
-import { Check, CheckCheck, Trash2 } from "lucide-react"
+import { Check, Trash2 } from "lucide-react"
 
 export default function NotificationsPage() {
   const notifications = useNotificationStore(state => state.notifications)

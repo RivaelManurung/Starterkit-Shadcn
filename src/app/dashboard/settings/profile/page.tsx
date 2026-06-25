@@ -17,7 +17,6 @@ import {
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
-import { useSettingsStore } from "@/stores/settings-store"
 import { useUserStore } from "@/stores/user-store"
 import { useAuthStore } from "@/stores/auth-store"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"

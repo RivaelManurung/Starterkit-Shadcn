@@ -18,7 +18,7 @@ interface TagState {
 
 export const useTagStore = create<TagState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       tags: mockTags,
       
       createTag: (tagData) => set((state) => {

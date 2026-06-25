@@ -38,7 +38,7 @@ const defaultFilters: UserFilters = {
 
 export const useUserStore = create<UserState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       users: mockUsers,
       filters: defaultFilters,
       

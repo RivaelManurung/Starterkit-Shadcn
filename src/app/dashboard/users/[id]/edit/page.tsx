@@ -91,7 +91,7 @@ export default function EditUserPage() {
       email: values.email,
       role: values.role,
       status: values.status,
-    } as any)
+    })
     toast.success("Pengguna berhasil diperbarui")
     router.push("/dashboard/users")
   }
@@ -119,9 +119,9 @@ export default function EditUserPage() {
             </CardHeader>
             <CardContent>
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit as any)} className="space-y-6">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   <FormField
-                    control={form.control as any}
+                    control={form.control}
                     name="fullName"
                     render={({ field }) => (
                       <FormItem>
@@ -134,7 +134,7 @@ export default function EditUserPage() {
                     )}
                   />
                   <FormField
-                    control={form.control as any}
+                    control={form.control}
                     name="email"
                     render={({ field }) => (
                       <FormItem>
@@ -148,7 +148,7 @@ export default function EditUserPage() {
                   />
                   <div className="grid grid-cols-2 gap-4">
                     <FormField
-                      control={form.control as any}
+                      control={form.control}
                       name="role"
                       render={({ field }) => (
                         <FormItem>
@@ -170,7 +170,7 @@ export default function EditUserPage() {
                       )}
                     />
                     <FormField
-                      control={form.control as any}
+                      control={form.control}
                       name="status"
                       render={({ field }) => (
                         <FormItem>

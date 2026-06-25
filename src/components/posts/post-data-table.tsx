@@ -22,10 +22,10 @@ import { PostFilters } from "./post-filters"
 import { usePostStore } from "@/stores/post-store"
 import { formatDate, truncate } from "@/lib/utils"
 import { ConfirmDelete } from "@/components/shared/confirm-delete"
+import { Post } from "@/types"
 // import { exportToJSON, // exportToCSV } from "@/lib/mock/utils"
 
 export function PostDataTable() {
-  const filters = usePostStore(state => state.filters)
   const posts = usePostStore(state => state.posts)
   const deletePost = usePostStore(state => state.deletePost)
   const bulkDeletePosts = usePostStore(state => state.bulkDeletePosts)
@@ -44,14 +44,14 @@ export function PostDataTable() {
 
   const memoizedData = React.useMemo(() => data, [data])
 
-  const columns = React.useMemo<ColumnDef<any>[]>(() => [
+  const columns = React.useMemo<ColumnDef<Post>[]>(() => [
     {
       id: "select",
       header: ({ table }) => (
         <Checkbox
           checked={
             (table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")) as any
+            (table.getIsSomePageRowsSelected() && "indeterminate")) as boolean | "indeterminate"
           }
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
           aria-label="Select all"
@@ -171,9 +171,9 @@ export function PostDataTable() {
     },
   ], [deletePost])
 
-  const bulkActions = (table: any) => {
+  const bulkActions = (table: { getSelectedRowModel: () => { rows: Array<{ original: { id: string } }> }; resetRowSelection: () => void }) => {
     const selectedRows = table.getSelectedRowModel().rows
-    const ids = selectedRows.map((r: any) => r.original.id)
+    const ids = selectedRows.map((r) => r.original.id)
 
     return (
       <div className="flex gap-2">
@@ -232,7 +232,7 @@ export function PostDataTable() {
       <DataTable 
         columns={columns} 
         data={memoizedData}
-        pagination={pagination as any}
+        pagination={pagination as import("@/types").PaginatedResult<Post>}
         onPageChange={(page) => usePostStore.getState().setFilters({ page })}
         bulkActions={bulkActions}
       />

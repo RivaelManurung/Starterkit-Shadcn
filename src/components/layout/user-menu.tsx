@@ -9,7 +9,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useSettingsStore } from "@/stores/settings-store"
 import { User, Settings, LogOut } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -33,7 +32,7 @@ export function UserMenu() {
       description: "User logged out",
       oldValue: null,
       newValue: null,
-      user: user as any,
+      user: user as unknown as import("@/types").ActivityLog["user"],
       ipAddress: "127.0.0.1",
       userAgent: "browser",
       sessionId: "session",
@@ -41,7 +40,7 @@ export function UserMenu() {
       status: "success",
       metadata: {},
       createdAt: new Date()
-    } as any)
+    } as Omit<import("@/types").ActivityLog, "id" | "createdAt">)
     router.push('/login')
   }
 

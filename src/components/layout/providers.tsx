@@ -6,7 +6,6 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { Toaster } from "@/components/ui/sonner"
 import { StoreHydrator } from "@/components/store-hydrator"
 import { useRealtimeSimulator } from "@/lib/realtime-simulator"
-import { useSettingsStore } from "@/stores/settings-store"
 
 // Separate component for simulator so it only runs on client
 const Simulator = () => {
@@ -17,7 +16,6 @@ const Simulator = () => {
 export function Providers({ children }: { children: React.ReactNode }) {
   // Use state to prevent hydration mismatch for theme from settings
   const [mounted, setMounted] = React.useState(false)
-  const themeSetting = useSettingsStore(state => state.appearance.theme)
   
   React.useEffect(() => {
     setMounted(true)

@@ -17,26 +17,30 @@ import {
 import { ConfirmDelete } from "@/components/shared/confirm-delete"
 import { toast } from "sonner"
 import { formatDate } from "@/lib/utils"
-import { User, Role } from "@/types"
-import { Badge } from "@/components/ui/badge"
+import { User, PaginatedResult } from "@/types"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+
+const PAGE_SIZE = 10
 
 export default function UsersPage() {
   const users = useUserStore(state => state.users)
   const deleteUser = useUserStore(state => state.deleteUser)
   const router = useRouter()
+  const [page, setPage] = React.useState(1)
 
-  const getRoleBadge = (role: Role) => {
-    switch (role) {
-      case "superadmin":
-      case "admin": return <Badge className="bg-destructive text-destructive-foreground hover:bg-destructive/80">Admin</Badge>
-      case "editor": return <Badge className="bg-primary text-primary-foreground hover:bg-primary/80">Editor</Badge>
-      case "author": return <Badge variant="secondary">Author</Badge>
-      case "viewer": return <Badge variant="outline">Viewer</Badge>
-      default: return <Badge>{role}</Badge>
-    }
+  const totalPages = Math.ceil(users.length / PAGE_SIZE)
+  const paginatedUsers = users.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
+  const pagination: PaginatedResult<User> = {
+    data: paginatedUsers,
+    total: users.length,
+    page,
+    pageSize: PAGE_SIZE,
+    totalPages,
+    hasNextPage: page < totalPages,
+    hasPrevPage: page > 1,
   }
 
   const columns: ColumnDef<User>[] = [
@@ -62,7 +66,9 @@ export default function UsersPage() {
     {
       accessorKey: "role",
       header: "Peran",
-      cell: ({ row }) => getRoleBadge(row.getValue("role")),
+      cell: ({ row }) => (
+        <span className="text-sm text-muted-foreground capitalize">{row.getValue("role")}</span>
+      ),
     },
     {
       accessorKey: "postCount",
@@ -128,7 +134,12 @@ export default function UsersPage() {
         </Link>
       </div>
 
-      <DataTable columns={columns} data={users} />
+      <DataTable
+        columns={columns}
+        data={paginatedUsers}
+        pagination={pagination}
+        onPageChange={setPage}
+      />
     </div>
   )
 }

@@ -5,7 +5,13 @@ import { useUserStore } from "@/stores/user-store";
 import { useNotificationStore } from "@/stores/notification-store";
 import { useActivityStore } from "@/stores/activity-store";
 import { useSettingsStore } from "@/stores/settings-store";
-// import { analyticsData } from "@/lib/mock/data/analytics-data";
+import { useMemo } from "react";
+
+// Seed-based pseudo-random for stable mock data
+function seededRandom(seed: number) {
+  const x = Math.sin(seed) * 10000
+  return x - Math.floor(x)
+}
 
 export function useMockData() {
   const posts = usePostStore(state => state.posts);
@@ -16,6 +22,25 @@ export function useMockData() {
   const activities = useActivityStore(state => state.logs);
   const settings = useSettingsStore(state => state);
 
+  const analytics = useMemo(() => {
+    return Array.from({ length: 30 }).map((_, i) => {
+      const d = new Date()
+      d.setDate(d.getDate() - (29 - i))
+      return {
+        date: d.toISOString(),
+        views: Math.floor(seededRandom(i * 7 + 1) * 5000) + 1000,
+        visitors: Math.floor(seededRandom(i * 7 + 2) * 3000) + 500,
+        engagementRate: Math.floor(seededRandom(i * 7 + 3) * 40) + 20,
+        sources: {
+          direct: Math.floor(seededRandom(i * 7 + 4) * 1000),
+          social: Math.floor(seededRandom(i * 7 + 5) * 1000),
+          search: Math.floor(seededRandom(i * 7 + 6) * 1000),
+          referral: Math.floor(seededRandom(i * 7 + 7) * 1000),
+        }
+      }
+    })
+  }, []);
+
   return {
     posts,
     categories,
@@ -24,21 +49,6 @@ export function useMockData() {
     notifications,
     activities,
     settings,
-    analytics: Array.from({ length: 30 }).map((_, i) => {
-      const d = new Date()
-      d.setDate(d.getDate() - (29 - i))
-      return {
-        date: d.toISOString(),
-        views: Math.floor(Math.random() * 5000) + 1000,
-        visitors: Math.floor(Math.random() * 3000) + 500,
-        engagementRate: Math.floor(Math.random() * 40) + 20,
-        sources: {
-          direct: Math.floor(Math.random() * 1000),
-          social: Math.floor(Math.random() * 1000),
-          search: Math.floor(Math.random() * 1000),
-          referral: Math.floor(Math.random() * 1000),
-        }
-      }
-    }),
+    analytics,
   };
 }

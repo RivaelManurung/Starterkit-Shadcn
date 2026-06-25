@@ -7,7 +7,6 @@ import {
   Search, 
   Moon, 
   Sun, 
-  Menu,
   User as UserIcon,
   Settings,
   LogOut,
@@ -28,12 +27,11 @@ import {
   DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar"
+import { SidebarTrigger } from "@/components/ui/sidebar"
 import { useAuthStore } from "@/stores/auth-store"
 import { useNotificationStore } from "@/stores/notification-store"
 import { BreadcrumbNav } from "./breadcrumb-nav"
 import Link from "next/link"
-import { Role } from "@/types"
 
 // We will build this in a separate step
 import { SearchDialog } from "@/components/shared/search-dialog"
@@ -42,12 +40,7 @@ import { SearchDialog } from "@/components/shared/search-dialog"
 export function AppHeader() {
   const { setTheme, theme } = useTheme()
   const [searchOpen, setSearchOpen] = React.useState(false)
-  const { isMobile } = useSidebar()
   const [mounted, setMounted] = React.useState(false)
-  
-  React.useEffect(() => {
-    setMounted(true)
-  }, [])
   
   const currentUser = useAuthStore(state => state.currentUser)
   const switchRole = useAuthStore(state => state.switchRole)
@@ -57,10 +50,8 @@ export function AppHeader() {
   const unreadCount = useNotificationStore(state => state.unreadCount)
   const markRead = useNotificationStore(state => state.markRead)
 
-  if (!currentUser) return null
-
-  // Keyboard shortcut for search
   React.useEffect(() => {
+    setMounted(true)
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
@@ -70,6 +61,8 @@ export function AppHeader() {
     document.addEventListener("keydown", down)
     return () => document.removeEventListener("keydown", down)
   }, [])
+
+  if (!currentUser) return null
 
   return (
     <>

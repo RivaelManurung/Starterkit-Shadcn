@@ -101,7 +101,7 @@ export const useRealtimeSimulator = () => {
           oldValue: null,
           newValue: null,
           userId: `usr_random`,
-          user: null as any, // In a real app we'd have a mock user
+          user: null,
           ipAddress: `192.168.1.${Math.floor(Math.random() * 255)}`,
           userAgent: "Simulated Browser",
           sessionId: "sess_simulated",

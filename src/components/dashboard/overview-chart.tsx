@@ -31,7 +31,7 @@ export function OverviewChart() {
   
   const data = useMemo(() => {
     // Get last 30 days
-    return (analytics as any[]).slice(-30).map(d => ({
+    return (analytics as Array<{ date: string; views: number; visitors: number; engagementRate: number; sources: Record<string, number> }>).slice(-30).map(d => ({
       ...d,
       formattedDate: format(new Date(d.date), "dd MMM yyyy", { locale: idLocale }),
       shortDate: format(new Date(d.date), "dd MMM", { locale: idLocale })

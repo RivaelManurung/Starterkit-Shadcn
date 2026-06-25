@@ -67,7 +67,7 @@ export function PostFilters() {
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="ALL">Semua Kategori</SelectItem>
-          {categories.map((c: any) => (
+          {categories.map((c: import("@/types").Category) => (
             <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
           ))}
         </SelectContent>

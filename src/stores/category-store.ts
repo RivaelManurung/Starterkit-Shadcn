@@ -18,7 +18,7 @@ interface CategoryState {
 
 export const useCategoryStore = create<CategoryState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       categories: mockCategories,
       
       createCategory: (categoryData) => set((state) => {
@@ -34,7 +34,7 @@ export const useCategoryStore = create<CategoryState>()(
       }),
       
       updateCategory: (id, data) => set((state) => ({
-        categories: state.categories.map((c: any) => 
+        categories: state.categories.map((c) => 
           c.id === id ? { ...c, ...data, updatedAt: new Date() } : c
         )
       })),
@@ -55,7 +55,7 @@ export const useCategoryStore = create<CategoryState>()(
       }),
       
       moveToParent: (id, newParentId) => set((state) => ({
-        categories: state.categories.map((c: any) => 
+        categories: state.categories.map((c) => 
           c.id === id ? { ...c, parentId: newParentId, updatedAt: new Date() } : c
         )
       }))

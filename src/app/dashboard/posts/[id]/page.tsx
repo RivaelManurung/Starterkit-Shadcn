@@ -2,11 +2,11 @@
 
 import { ChevronLeft, Edit, CalendarIcon, Eye, Clock, User, Tag } from "lucide-react"
 import Link from "next/link"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import { useParams, useRouter } from "next/navigation"
 import { usePostStore } from "@/stores/post-store"
 import { useEffect, useState } from "react"
-import { Post } from "@/types"
+import { Post, Tag as TagType } from "@/types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PostStatusBadge } from "@/components/posts/post-status-badge"
 import { formatDate } from "@/lib/utils"
@@ -138,7 +138,7 @@ export default function PostDetailPage() {
                 <p className="text-sm font-medium mb-2">Tag</p>
                 {post.tags && post.tags.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
-                    {post.tags.map((tag: any) => (
+                    {post.tags.map((tag: TagType) => (
                       <Badge key={tag.id} variant="secondary" className="font-normal">
                         <Tag className="h-3 w-3 mr-1" />
                         {tag.name}

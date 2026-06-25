@@ -21,7 +21,6 @@ import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 
 export function TopPostsTable() {
-  const stats = null
   const recentPosts = usePostStore(state => state.posts).slice(0, 5)
 
   return (
