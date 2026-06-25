@@ -49,10 +49,7 @@ export function PostDataTable() {
       id: "select",
       header: ({ table }) => (
         <Checkbox
-          checked={
-            (table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")) as boolean | "indeterminate"
-          }
+          checked={table.getIsAllPageRowsSelected()}
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
           aria-label="Select all"
         />
@@ -111,7 +108,7 @@ export function PostDataTable() {
       header: "Penulis",
       cell: ({ row }) => {
         const author = row.original.author
-        return author ? <span className="text-sm">{author.name}</span> : <span className="text-sm text-muted-foreground">-</span>
+        return author ? <span className="text-sm">{author.fullName}</span> : <span className="text-sm text-muted-foreground">-</span>
       },
     },
     {
@@ -171,7 +168,7 @@ export function PostDataTable() {
     },
   ], [deletePost])
 
-  const bulkActions = (table: { getSelectedRowModel: () => { rows: Array<{ original: { id: string } }> }; resetRowSelection: () => void }) => {
+  const bulkActions = (table: import("@tanstack/react-table").Table<Post>) => {
     const selectedRows = table.getSelectedRowModel().rows
     const ids = selectedRows.map((r) => r.original.id)
 

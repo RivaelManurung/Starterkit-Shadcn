@@ -2,122 +2,78 @@
 
 import * as React from "react"
 import { useUserStore } from "@/stores/user-store"
-import { DataTable } from "@/components/shared/data-table"
-import { ColumnDef } from "@tanstack/react-table"
-import { Button, buttonVariants } from "@/components/ui/button"
-import { MoreHorizontal, Plus } from "lucide-react"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { ConfirmDelete } from "@/components/shared/confirm-delete"
+import { Button } from "@/components/ui/button"
+import { Plus } from "lucide-react"
 import { toast } from "sonner"
-import { formatDate } from "@/lib/utils"
-import { User, PaginatedResult } from "@/types"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { User } from "@/types"
+import { UserDataTable } from "@/components/users/user-data-table"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
-const PAGE_SIZE = 10
+const formSchema = z.object({
+  fullName: z.string().min(2, "Nama minimal 2 karakter."),
+  email: z.string().email("Email tidak valid."),
+  role: z.enum(["superadmin", "admin", "editor", "author", "viewer", "moderator"]),
+})
 
 export default function UsersPage() {
   const users = useUserStore(state => state.users)
   const deleteUser = useUserStore(state => state.deleteUser)
-  const router = useRouter()
-  const [page, setPage] = React.useState(1)
+  const createUser = useUserStore(state => state.createUser)
+  const updateUser = useUserStore(state => state.updateUser)
 
-  const totalPages = Math.ceil(users.length / PAGE_SIZE)
-  const paginatedUsers = users.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  const [isAddOpen, setIsAddOpen] = React.useState(false)
 
-  const pagination: PaginatedResult<User> = {
-    data: paginatedUsers,
-    total: users.length,
-    page,
-    pageSize: PAGE_SIZE,
-    totalPages,
-    hasNextPage: page < totalPages,
-    hasPrevPage: page > 1,
+  const addForm = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      fullName: "",
+      email: "",
+      role: "author",
+    },
+  })
+
+  const onAddSubmit = (values: z.infer<typeof formSchema>) => {
+    createUser({ 
+      fullName: values.fullName, 
+      email: values.email, 
+      role: values.role as any, 
+      avatar: "" 
+    })
+    toast.success("Pengguna berhasil dibuat")
+    setIsAddOpen(false)
+    addForm.reset()
   }
 
-  const columns: ColumnDef<User>[] = [
-    {
-      accessorKey: "name",
-      header: "Pengguna",
-      cell: ({ row }) => {
-        const user = row.original
-        return (
-          <div className="flex items-center gap-3">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={user.avatar} alt={user.fullName} />
-              <AvatarFallback>{user.fullName.substring(0, 2).toUpperCase()}</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
-              <span className="font-medium">{user.fullName}</span>
-              <span className="text-xs text-muted-foreground">{user.email}</span>
-            </div>
-          </div>
-        )
-      },
-    },
-    {
-      accessorKey: "role",
-      header: "Peran",
-      cell: ({ row }) => (
-        <span className="text-sm text-muted-foreground capitalize">{row.getValue("role")}</span>
-      ),
-    },
-    {
-      accessorKey: "postCount",
-      header: () => <div className="text-right">Artikel</div>,
-      cell: ({ row }) => (
-        <div className="text-right">{row.getValue("postCount")}</div>
-      ),
-    },
-    {
-      accessorKey: "createdAt",
-      header: "Bergabung Pada",
-      cell: ({ row }) => formatDate(row.getValue("createdAt")),
-    },
-    {
-      id: "actions",
-      cell: ({ row }) => {
-        const user = row.original
-
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger render={<Button variant="ghost" size="icon" className="h-8 w-8" />}>
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Aksi</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => router.push(`/dashboard/users/${user.id}/edit`)}>
-                Edit
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <ConfirmDelete
-                title="Hapus Pengguna?"
-                description={`Anda yakin ingin menghapus pengguna "${user.fullName}"?`}
-                onConfirm={() => {
-                  deleteUser(user.id)
-                  toast.success("Pengguna dihapus")
-                }}
-                trigger={
-                  <DropdownMenuItem variant="destructive" onSelect={(e) => e.preventDefault()}>
-                    Hapus
-                  </DropdownMenuItem>
-                }
-              />
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )
-      },
-    },
-  ]
+  const handleBulkDelete = (ids: string[]) => {
+    ids.forEach(id => deleteUser(id))
+    toast.success(`${ids.length} pengguna dihapus`)
+  }
 
   return (
     <div className="space-y-6">
@@ -128,18 +84,91 @@ export default function UsersPage() {
             Kelola akses dan peran pengguna di dashboard Anda.
           </p>
         </div>
-        <Link href="/dashboard/users/new" className={buttonVariants()}>
-          <Plus className="mr-2 h-4 w-4" />
-          Tambah Pengguna
-        </Link>
+        <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+          <DialogTrigger render={<Button><Plus className="mr-2 h-4 w-4" />Tambah Pengguna</Button>} />
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Tambah Pengguna Baru</DialogTitle>
+              <DialogDescription>
+                Masukkan informasi untuk pengguna baru.
+              </DialogDescription>
+            </DialogHeader>
+            <Form {...addForm}>
+              <form onSubmit={addForm.handleSubmit(onAddSubmit)} className="space-y-4">
+                <FormField
+                  control={addForm.control}
+                  name="fullName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nama Lengkap</FormLabel>
+                      <FormControl>
+                        <Input placeholder="John Doe" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={addForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input placeholder="john@example.com" type="email" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={addForm.control}
+                  name="role"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Peran</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Pilih peran" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="superadmin">Superadmin</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                          <SelectItem value="moderator">Moderator</SelectItem>
+                          <SelectItem value="editor">Editor</SelectItem>
+                          <SelectItem value="author">Author</SelectItem>
+                          <SelectItem value="viewer">Viewer</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button type="button" variant="outline" onClick={() => setIsAddOpen(false)}>
+                    Batal
+                  </Button>
+                  <Button type="submit">
+                    Simpan
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
       </div>
 
-      <DataTable
-        columns={columns}
-        data={paginatedUsers}
-        pagination={pagination}
-        onPageChange={setPage}
+      <UserDataTable 
+        data={users} 
+        onDelete={(id) => {
+          deleteUser(id)
+          toast.success("Pengguna dihapus")
+        }} 
+        onBulkDelete={handleBulkDelete}
       />
+
     </div>
   )
 }

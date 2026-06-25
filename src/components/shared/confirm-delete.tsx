@@ -27,8 +27,7 @@ export function ConfirmDelete({
 }: ConfirmDeleteProps) {
   return (
     <AlertDialog>
-      {/* @ts-expect-error – nativeButton=false allows non-button trigger elements (e.g. DropdownMenuItem) */}
-      <AlertDialogTrigger render={trigger} nativeButton={false} />
+      <AlertDialogTrigger render={trigger} />
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>

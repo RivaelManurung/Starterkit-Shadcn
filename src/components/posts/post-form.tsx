@@ -184,7 +184,7 @@ export function PostForm({ initialData }: PostFormProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Pilih status" />
@@ -202,12 +202,15 @@ export function PostForm({ initialData }: PostFormProps) {
                 )}
               />
 
-              <div className="pt-4 flex gap-2">
+            </div>
+
+            <div className="p-6 rounded-xl border bg-card space-y-4">
+              <div className="flex flex-col gap-3">
+                <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                  Simpan Perubahan
+                </Button>
                 <Button type="button" variant="outline" className="w-full" onClick={() => router.back()}>
                   Batal
-                </Button>
-                <Button type="submit" className="w-full">
-                  Simpan
                 </Button>
               </div>
             </div>
@@ -233,7 +236,7 @@ export function PostForm({ initialData }: PostFormProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Kategori</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Pilih kategori" />

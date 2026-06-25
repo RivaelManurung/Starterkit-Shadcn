@@ -4,16 +4,20 @@ export const generateAnalyticsData = (days: number = 90) => {
   let uniqueVisitors = 800
   let sessions = 850
   
-  const now = new Date()
+  const now = new Date("2026-06-25T12:00:00Z")
   
   for (let i = days; i >= 0; i--) {
     const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000)
     
-    // Add some random noise and a slight upward trend
-    const noise = Math.random() * 200 - 100
+    // Add some deterministic noise and a slight upward trend
+    const pseudoRand = ((i * 13.51) % 100) / 100
+    const pseudoRand2 = ((i * 7.33) % 100) / 100
+    const pseudoRand3 = ((i * 19.87) % 100) / 100
+    
+    const noise = pseudoRand * 200 - 100
     pageviews = Math.floor(Math.max(500, pageviews + noise + 5))
-    uniqueVisitors = Math.floor(pageviews * (0.6 + Math.random() * 0.2))
-    sessions = Math.floor(uniqueVisitors * (1.1 + Math.random() * 0.2))
+    uniqueVisitors = Math.floor(pageviews * (0.6 + pseudoRand2 * 0.2))
+    sessions = Math.floor(uniqueVisitors * (1.1 + pseudoRand3 * 0.2))
     
     // Weekly pattern (less traffic on weekends)
     const dayOfWeek = date.getDay()
@@ -25,8 +29,8 @@ export const generateAnalyticsData = (days: number = 90) => {
       pageviews: Math.floor(pageviews * multiplier),
       uniqueVisitors: Math.floor(uniqueVisitors * multiplier),
       sessions: Math.floor(sessions * multiplier),
-      bounceRate: 40 + Math.random() * 20, // 40-60%
-      avgSessionDuration: 120 + Math.random() * 180, // 2-5 minutes in seconds
+      bounceRate: 40 + (((i * 5.11) % 100) / 100) * 20, // 40-60%
+      avgSessionDuration: 120 + (((i * 8.43) % 100) / 100) * 180, // 2-5 minutes in seconds
     })
   }
   
@@ -48,11 +52,11 @@ export const mockAnalytics = {
   topContent: Array.from({ length: 10 }).map((_, i) => ({
     id: `post_${i}`,
     title: `Artikel Populer ${i + 1}`,
-    views: 10000 - i * 500 + Math.floor(Math.random() * 200),
-    uniqueVisitors: 8000 - i * 400 + Math.floor(Math.random() * 150),
-    avgTime: 180 + Math.random() * 100,
-    bounceRate: 35 + Math.random() * 15,
-    conversions: 2 + Math.random() * 5
+    views: 10000 - i * 500 + Math.floor((((i * 3.1) % 100) / 100) * 200),
+    uniqueVisitors: 8000 - i * 400 + Math.floor((((i * 4.2) % 100) / 100) * 150),
+    avgTime: 180 + (((i * 5.3) % 100) / 100) * 100,
+    bounceRate: 35 + (((i * 6.4) % 100) / 100) * 15,
+    conversions: 2 + (((i * 7.5) % 100) / 100) * 5
   })),
   sources: {
     pie: [

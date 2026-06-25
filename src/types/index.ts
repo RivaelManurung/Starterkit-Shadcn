@@ -299,3 +299,53 @@ export type ActivityEntity =
 
 export type PostStatus = Post["status"];
 export interface PaginatedResult<T> { data: T[]; total: number; page: number; pageSize: number; totalPages: number; hasNextPage: boolean; hasPrevPage: boolean; }
+
+export interface AnalyticsDataPoint {
+  date: string
+  pageviews: number
+  uniqueVisitors: number
+  sessions: number
+  bounceRate: number
+  avgSessionDuration: number
+  engagementRate?: number
+}
+
+export interface AnalyticsOverview {
+  totalPageviews: number
+  pageviewsChange: number
+  uniqueVisitors: number
+  uniqueVisitorsChange: number
+  bounceRate: number
+  bounceRateChange: number
+  avgSessionDuration: number
+  avgSessionDurationChange: number
+}
+
+export interface TopContent {
+  id: string
+  title: string
+  views: number
+  uniqueVisitors: number
+  avgTime: number
+  bounceRate: number
+  conversions: number
+}
+
+export interface TrafficSource {
+  name: string
+  value: number
+  fill: string
+}
+
+export interface AnalyticsSummary {
+  overview: AnalyticsOverview
+  traffic: AnalyticsDataPoint[]
+  topContent: TopContent[]
+  sources: {
+    pie: TrafficSource[]
+    direct: number
+    social: number
+    search: number
+    referral: number
+  }
+}

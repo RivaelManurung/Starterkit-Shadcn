@@ -10,10 +10,13 @@ import { toast } from "sonner"
 import { formatDate } from "@/lib/utils"
 import { ActivityLog } from "@/types"
 import { Badge } from "@/components/ui/badge"
+import { Switch } from "@/components/ui/switch"
+import { Label } from "@/components/ui/label"
 
 export default function ActivityPage() {
   const logs = useActivityStore(state => state.logs)
   const clearLogs = useActivityStore(state => state.clearOldLogs)
+  const [autoRefresh, setAutoRefresh] = React.useState(true)
   // removed getLogs call
 
   const columns: ColumnDef<ActivityLog>[] = [
@@ -66,19 +69,31 @@ export default function ActivityPage() {
             Rekam jejak seluruh aktivitas sistem dan pengguna.
           </p>
         </div>
-        <ConfirmDelete
-          title="Bersihkan Log?"
-          description="Aksi ini akan menghapus semua riwayat aktivitas dan tidak dapat dibatalkan."
-          onConfirm={() => {
-            clearLogs(0)
-            toast.success("Log aktivitas dibersihkan")
-          }}
-          trigger={
-            <Button variant="destructive">
-              Bersihkan Log
-            </Button>
-          }
-        />
+        <div className="flex items-center gap-4">
+          <div className="flex items-center space-x-2 mr-4">
+            <Switch 
+              id="auto-refresh" 
+              checked={autoRefresh} 
+              onCheckedChange={setAutoRefresh} 
+            />
+            <Label htmlFor="auto-refresh" className={autoRefresh ? "text-primary" : "text-muted-foreground"}>
+              {autoRefresh ? "Live Updates: On" : "Live Updates: Off"}
+            </Label>
+          </div>
+          <ConfirmDelete
+            title="Bersihkan Log?"
+            description="Aksi ini akan menghapus semua riwayat aktivitas dan tidak dapat dibatalkan."
+            onConfirm={() => {
+              clearLogs(0)
+              toast.success("Log aktivitas dibersihkan")
+            }}
+            trigger={
+              <Button variant="destructive">
+                Bersihkan Log
+              </Button>
+            }
+          />
+        </div>
       </div>
 
       <DataTable columns={columns} data={logs} />

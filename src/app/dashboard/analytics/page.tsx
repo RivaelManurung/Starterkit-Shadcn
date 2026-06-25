@@ -4,10 +4,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useMockData } from "@/hooks/use-mock-data"
 import { Bar, BarChart, CartesianGrid, XAxis, Tooltip, Area, AreaChart, Pie, PieChart, Cell, Legend } from "recharts"
 import { ChartConfig, ChartContainer, ChartTooltipContent } from "@/components/ui/chart"
-import { format } from "date-fns"
+import { format, addDays } from "date-fns"
 import { id as idLocale } from "date-fns/locale"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { TopPostsTable } from "@/components/dashboard/top-posts-table"
+import { DatePickerWithRange } from "@/components/shared/date-range-picker"
+import { DateRange } from "react-day-picker"
 
 const areaConfig = {
   views: { label: "Views", color: "var(--chart-1)" },
@@ -23,6 +25,10 @@ const sourceConfig = {
 
 export default function AnalyticsPage() {
   const { analytics } = useMockData()
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: addDays(new Date(), -30),
+    to: new Date(),
+  })
 
   const data = useMemo(() => {
     return analytics.slice(-30).map(d => ({
@@ -51,11 +57,14 @@ export default function AnalyticsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Analitik</h1>
-        <p className="text-sm text-muted-foreground">
-          Laporan terperinci mengenai trafik dan performa konten Anda.
-        </p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Analitik</h1>
+          <p className="text-sm text-muted-foreground">
+            Laporan terperinci mengenai trafik dan performa konten Anda.
+          </p>
+        </div>
+        <DatePickerWithRange date={dateRange} setDate={setDateRange} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

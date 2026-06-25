@@ -12,7 +12,6 @@ function AlertDialog({ ...props }: AlertDialogPrimitive.Root.Props) {
 
 function AlertDialogTrigger({ ...props }: AlertDialogPrimitive.Trigger.Props) {
   return (
-    // @ts-expect-error – nativeButton=false allows non-button trigger elements (e.g. DropdownMenuItem)
     <AlertDialogPrimitive.Trigger data-slot="alert-dialog-trigger" nativeButton={false} {...props} />
   )
 }

@@ -48,14 +48,14 @@ export const PermissionGate: React.FC<PermissionGateProps> = ({
   return <>{children}</>
 }
 
-interface RoleGateProps {
+interface CanAccessProps {
   role: Role | Role[]
   redirect?: string
   fallback?: React.ReactNode
   children: React.ReactNode
 }
 
-export const RoleGate: React.FC<RoleGateProps> = ({ 
+export const CanAccess: React.FC<CanAccessProps> = ({ 
   role, 
   redirect, 
   fallback = null, 
