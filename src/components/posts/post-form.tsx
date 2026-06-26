@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { RichTextEditor } from "@/components/editor/RichTextEditor"
 import {
   Select,
   SelectContent,
@@ -60,13 +61,15 @@ export function PostForm({ initialData }: PostFormProps) {
   const tags = useTagStore((state) => state.tags)
   const currentUser = useAuthStore(state => state.currentUser)
 
+  const storageKey = initialData ? `post_draft_edit_${initialData.id}` : "post_draft_new"
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData
       ? {
           title: initialData.title,
           slug: initialData.slug,
-          content: stripHtml(initialData.content),
+          content: initialData.content,
           excerpt: stripHtml(initialData.excerpt || ""),
           categoryId: initialData.categoryId || "",
           tagIds: initialData.tags?.map(t => t.id) || [],
@@ -96,6 +99,8 @@ export function PostForm({ initialData }: PostFormProps) {
       toast.error("Anda harus login untuk membuat artikel.")
       return
     }
+
+    localStorage.removeItem(storageKey)
 
     if (initialData) {
       updatePost(initialData.id, values)
@@ -139,10 +144,10 @@ export function PostForm({ initialData }: PostFormProps) {
                     <FormItem>
                       <FormLabel>Konten</FormLabel>
                       <FormControl>
-                        <Textarea 
-                          placeholder="Tulis konten Anda di sini..." 
-                          className="min-h-[400px]"
-                          {...field} 
+                        <RichTextEditor
+                          value={field.value}
+                          onChange={field.onChange}
+                          storageKey={storageKey}
                         />
                       </FormControl>
                       <FormMessage />
@@ -181,25 +186,37 @@ export function PostForm({ initialData }: PostFormProps) {
               <FormField
                 control={form.control}
                 name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Pilih status" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="draft">Draft</SelectItem>
-                        <SelectItem value="published">Published</SelectItem>
-                        <SelectItem value="scheduled">Scheduled</SelectItem>
-                        <SelectItem value="archived">Archived</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  const statusLabels: Record<string, string> = {
+                    draft: "Draft",
+                    published: "Published",
+                    scheduled: "Scheduled",
+                    archived: "Archived",
+                    under_review: "Under Review",
+                  }
+                  const selectedStatusLabel = statusLabels[field.value] || field.value
+                  return (
+                    <FormItem>
+                      <FormLabel>Status</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Pilih status">
+                              {selectedStatusLabel}
+                            </SelectValue>
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="draft">Draft</SelectItem>
+                          <SelectItem value="published">Published</SelectItem>
+                          <SelectItem value="scheduled">Scheduled</SelectItem>
+                          <SelectItem value="archived">Archived</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )
+                }}
               />
 
             </div>
@@ -233,26 +250,31 @@ export function PostForm({ initialData }: PostFormProps) {
               <FormField
                 control={form.control}
                 name="categoryId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Kategori</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Pilih kategori" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {categories.map((c: Category) => (
-                          <SelectItem key={c.id} value={c.id}>
-                            {c.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  const selectedCatName = categories.find((c: Category) => c.id === field.value)?.name || field.value
+                  return (
+                    <FormItem>
+                      <FormLabel>Kategori</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Pilih kategori">
+                              {selectedCatName || "Pilih kategori"}
+                            </SelectValue>
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {categories.map((c: Category) => (
+                            <SelectItem key={c.id} value={c.id}>
+                              {c.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )
+                }}
               />
               
               {/* For simplicity, Tags is handled via simple select or list, let's just use checkboxes or multi-select. 

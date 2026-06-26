@@ -1,7 +1,7 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 import { Post, PostStatus } from "@/types"
-import { mockPosts } from "@/lib/mock-data"
+import { mockPosts } from "@/constants/mock-data"
 
 interface PostFilters {
   search: string

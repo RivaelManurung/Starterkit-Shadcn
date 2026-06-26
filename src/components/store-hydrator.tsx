@@ -8,6 +8,7 @@ import { useNotificationStore } from "@/stores/notification-store"
 import { useSettingsStore } from "@/stores/settings-store"
 import { useTagStore } from "@/stores/tag-store"
 import { useUserStore } from "@/stores/user-store"
+import { usePenggunaStore } from "@/stores/usePenggunaStore"
 
 /**
  * Rehydrates all Zustand persist stores from localStorage after mount.
@@ -23,6 +24,7 @@ export function StoreHydrator() {
     useSettingsStore.persist.rehydrate()
     useTagStore.persist.rehydrate()
     useUserStore.persist.rehydrate()
+    usePenggunaStore.persist.rehydrate()
   }, [])
 
   return null

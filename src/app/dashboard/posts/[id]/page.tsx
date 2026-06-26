@@ -65,12 +65,10 @@ export default function PostDetailPage() {
               </p>
             </CardHeader>
             <CardContent>
-              <div className="prose prose-sm md:prose-base dark:prose-invert max-w-none">
-                {/* For mock purpose, we just split by newline and render paragraphs */}
-                {post.content.split('\n').map((paragraph, idx) => (
-                  <p key={idx}>{paragraph}</p>
-                ))}
-              </div>
+              <div 
+                className="prose prose-sm md:prose-base dark:prose-invert max-w-none"
+                dangerouslySetInnerHTML={{ __html: post.content }}
+              />
             </CardContent>
           </Card>
         </div>

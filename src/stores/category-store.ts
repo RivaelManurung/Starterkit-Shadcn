@@ -1,7 +1,7 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 import { Category } from "@/types"
-import { mockCategories } from "@/lib/mock-data"
+import { mockCategories } from "@/constants/mock-data"
 
 interface CategoryState {
   categories: Category[]

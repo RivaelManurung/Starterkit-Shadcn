@@ -1,11 +1,16 @@
 "use client"
 
 import * as React from "react"
-import { ThemeProvider } from "@/components/theme-provider"
+import { ThemeProvider } from "@/components/themes/ThemeProvider"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Toaster } from "@/components/ui/sonner"
 import { StoreHydrator } from "@/components/store-hydrator"
 import { useRealtimeSimulator } from "@/lib/realtime-simulator"
+import { KBarClientProvider } from "@/components/kbar/KBarClientProvider"
+import { CommandPalette } from "@/components/kbar/CommandPalette"
+import { queryClient } from "@/lib/query-client"
+import { QueryClientProvider } from "@tanstack/react-query"
+import { NuqsAdapter } from "nuqs/adapters/next/app"
 
 // Separate component for simulator so it only runs on client
 const Simulator = () => {
@@ -23,12 +28,19 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <ThemeProvider defaultTheme="system">
-      <TooltipProvider delay={0}>
-        {children}
-      </TooltipProvider>
-      <StoreHydrator />
-      <Toaster position="top-right" />
-      {mounted && <Simulator />}
+      <KBarClientProvider>
+        <QueryClientProvider client={queryClient}>
+          <NuqsAdapter>
+            <TooltipProvider delay={0}>
+              {children}
+            </TooltipProvider>
+            <CommandPalette />
+            <StoreHydrator />
+            <Toaster position="top-right" />
+            {mounted && <Simulator />}
+          </NuqsAdapter>
+        </QueryClientProvider>
+      </KBarClientProvider>
     </ThemeProvider>
   )
 }

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useTheme } from "next-themes"
+import { useTheme } from "@/components/themes/ThemeProvider"
 import { 
   Bell, 
   Search, 
@@ -33,13 +33,11 @@ import { useNotificationStore } from "@/stores/notification-store"
 import { BreadcrumbNav } from "./breadcrumb-nav"
 import Link from "next/link"
 
-// We will build this in a separate step
-import { SearchDialog } from "@/components/shared/search-dialog"
+import { KBarTrigger } from "@/components/kbar/KBarTrigger"
 
 
 export function AppHeader() {
-  const { setTheme, theme } = useTheme()
-  const [searchOpen, setSearchOpen] = React.useState(false)
+  const { setTheme, resolvedTheme } = useTheme()
   const [mounted, setMounted] = React.useState(false)
   
   const currentUser = useAuthStore(state => state.currentUser)
@@ -52,14 +50,6 @@ export function AppHeader() {
 
   React.useEffect(() => {
     setMounted(true)
-    const down = (e: KeyboardEvent) => {
-      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault()
-        setSearchOpen((open) => !open)
-      }
-    }
-    document.addEventListener("keydown", down)
-    return () => document.removeEventListener("keydown", down)
   }, [])
 
   if (!currentUser) return null
@@ -75,24 +65,13 @@ export function AppHeader() {
         
         <div className="flex flex-1 items-center justify-end gap-2">
           {/* Search Button */}
-          <Button 
-            variant="outline" 
-            className="w-full justify-start text-sm text-muted-foreground sm:pr-12 md:w-40 lg:w-64"
-            onClick={() => setSearchOpen(true)}
-          >
-            <Search className="mr-2 h-4 w-4" />
-            <span className="hidden lg:inline-flex">Cari sesuatu...</span>
-            <span className="inline-flex lg:hidden">Cari...</span>
-            <kbd className="pointer-events-none absolute right-1.5 top-1.5 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
-              <span className="text-xs">⌘</span>K
-            </kbd>
-          </Button>
+          <KBarTrigger />
 
           {/* Theme Toggle */}
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+            onClick={() => setTheme(resolvedTheme === "light" ? "dark" : "light")}
             className="h-9 w-9"
           >
             <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
@@ -213,8 +192,7 @@ export function AppHeader() {
         </div>
       </header>
 
-      {/* Global Search Dialog */}
-      <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
+
     </>
   )
 }

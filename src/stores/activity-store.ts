@@ -1,7 +1,7 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 import { ActivityLog, User } from "@/types"
-import { mockActivityLogs } from "@/lib/mock-data"
+import { mockActivityLogs } from "@/constants/mock-data"
 
 interface ActivityState {
   logs: ActivityLog[]

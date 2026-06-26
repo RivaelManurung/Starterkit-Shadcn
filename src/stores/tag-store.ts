@@ -1,7 +1,7 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 import { Tag } from "@/types"
-import { mockTags } from "@/lib/mock-data"
+import { mockTags } from "@/constants/mock-data"
 
 interface TagState {
   tags: Tag[]

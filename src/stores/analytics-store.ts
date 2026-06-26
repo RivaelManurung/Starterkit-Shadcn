@@ -1,5 +1,5 @@
 import { create } from "zustand"
-import { mockAnalytics } from "@/lib/mock-data"
+import { mockAnalytics } from "@/constants/mock-data"
 
 // Analytics store is mostly read-only, but could have date range filters
 interface AnalyticsState {

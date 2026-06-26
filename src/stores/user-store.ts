@@ -1,7 +1,7 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 import { User, Role } from "@/types"
-import { mockUsers } from "@/lib/mock-data"
+import { mockUsers } from "@/constants/mock-data"
 
 interface UserFilters {
   search: string

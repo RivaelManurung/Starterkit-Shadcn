@@ -1,7 +1,0 @@
-export * from "./users"
-export * from "./categories"
-export * from "./tags"
-export * from "./posts"
-export * from "./notifications"
-export * from "./activity-logs"
-export * from "./analytics"

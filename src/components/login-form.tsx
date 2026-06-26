@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { useAuthStore } from "@/stores/auth-store"
-import { mockUsers } from "@/lib/mock-data"
+import { mockUsers } from "@/constants/mock-data"
 
 export function LoginForm({
   className,

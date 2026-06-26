@@ -1,94 +1,52 @@
 "use client"
 
 import * as React from "react"
-import { useActivityStore } from "@/stores/activity-store"
-import { DataTable } from "@/components/shared/data-table"
-import { ColumnDef } from "@tanstack/react-table"
+import { LogTable } from "@/features/log-aktivitas/components/LogTable"
 import { Button } from "@/components/ui/button"
 import { ConfirmDelete } from "@/components/shared/confirm-delete"
+import { useActivityStore } from "@/stores/activity-store"
 import { toast } from "sonner"
-import { formatDate } from "@/lib/utils"
-import { ActivityLog } from "@/types"
-import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
+import { Trash2 } from "lucide-react"
 
 export default function ActivityPage() {
-  const logs = useActivityStore(state => state.logs)
-  const clearLogs = useActivityStore(state => state.clearOldLogs)
+  const clearLogs = useActivityStore((state) => state.clearOldLogs)
   const [autoRefresh, setAutoRefresh] = React.useState(true)
-  // removed getLogs call
-
-  const columns: ColumnDef<ActivityLog>[] = [
-    {
-      accessorKey: "action",
-      header: "Aksi",
-      cell: ({ row }) => (
-        <Badge variant="outline" className="font-mono text-xs">
-          {row.getValue("action")}
-        </Badge>
-      ),
-    },
-    {
-      accessorKey: "entityTitle",
-      header: "Entitas",
-      cell: ({ row }) => {
-        const log = row.original
-        return (
-          <div className="flex flex-col">
-            <span className="font-medium">{log.entityTitle}</span>
-            <span className="text-xs text-muted-foreground">{log.entity}</span>
-          </div>
-        )
-      },
-    },
-    {
-      accessorKey: "userId",
-      header: "Pengguna",
-      cell: ({ row }) => (
-        <span className="text-sm">{row.getValue("userId")}</span>
-      ),
-    },
-    {
-      accessorKey: "timestamp",
-      header: "Waktu",
-      cell: ({ row }) => (
-        <div className="text-sm text-muted-foreground whitespace-nowrap">
-          {formatDate(row.getValue("createdAt"))}
-        </div>
-      ),
-    },
-  ]
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="space-y-6 animate-in fade-in duration-500">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border/40 pb-5">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Log Aktivitas</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/75 bg-clip-text text-transparent">
+            Log Aktivitas
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
             Rekam jejak seluruh aktivitas sistem dan pengguna.
           </p>
         </div>
         <div className="flex items-center gap-4">
-          <div className="flex items-center space-x-2 mr-4">
+          <div className="flex items-center space-x-2 mr-2">
             <Switch 
               id="auto-refresh" 
               checked={autoRefresh} 
               onCheckedChange={setAutoRefresh} 
+              className="h-5"
             />
-            <Label htmlFor="auto-refresh" className={autoRefresh ? "text-primary" : "text-muted-foreground"}>
-              {autoRefresh ? "Live Updates: On" : "Live Updates: Off"}
+            <Label htmlFor="auto-refresh" className={`text-xs font-semibold ${autoRefresh ? "text-primary" : "text-muted-foreground"}`}>
+              {autoRefresh ? "Live: On" : "Live: Off"}
             </Label>
           </div>
           <ConfirmDelete
             title="Bersihkan Log?"
-            description="Aksi ini akan menghapus semua riwayat aktivitas dan tidak dapat dibatalkan."
+            description="Aksi ini akan menghapus seluruh riwayat aktivitas dan tidak dapat dibatalkan."
             onConfirm={() => {
               clearLogs(0)
               toast.success("Log aktivitas dibersihkan")
             }}
             trigger={
-              <Button variant="destructive">
+              <Button variant="destructive" className="rounded-xl font-semibold h-9 text-xs">
+                <Trash2 className="h-4 w-4 mr-2" />
                 Bersihkan Log
               </Button>
             }
@@ -96,7 +54,7 @@ export default function ActivityPage() {
         </div>
       </div>
 
-      <DataTable columns={columns} data={logs} />
+      <LogTable />
     </div>
   )
 }

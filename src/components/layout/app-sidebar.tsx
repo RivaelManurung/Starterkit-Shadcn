@@ -3,19 +3,7 @@
 import * as React from "react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
-import { 
-  LayoutDashboard, 
-  FileText, 
-  FolderTree, 
-  Tags, 
-  Users, 
-  Bell, 
-  Activity,
-  BarChart3,
-  Settings,
-  HelpCircle,
-  LogOut
-} from "lucide-react"
+import { LogOut } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -34,6 +22,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useAuthStore } from "@/stores/auth-store"
 import { useNotificationStore } from "@/stores/notification-store"
 import { usePermission } from "@/lib/rbac"
+import { mainNav, contentNav, systemNav, settingsNav, NavItem } from "@/config/nav"
 
 export function AppSidebar() {
   const pathname = usePathname()
@@ -55,45 +44,43 @@ export function AppSidebar() {
 
   if (!currentUser) return null
 
-  const mainNav: { title: string, url: string, icon: React.ComponentType, permission: boolean, badge?: number | null }[] = [
-    { title: "Overview", url: "/dashboard", icon: LayoutDashboard, permission: true },
-    { title: "Analitik", url: "/dashboard/analytics", icon: BarChart3, permission: canReadAnalytics },
-  ]
-  
-  const contentNav: { title: string, url: string, icon: React.ComponentType, permission: boolean, badge?: number | null }[] = [
-    { title: "Artikel", url: "/dashboard/posts", icon: FileText, permission: true },
-    { title: "Kategori", url: "/dashboard/categories", icon: FolderTree, permission: true },
-    { title: "Tag", url: "/dashboard/tags", icon: Tags, permission: true },
-  ]
-  
-  const systemNav: { title: string, url: string, icon: React.ComponentType, permission: boolean, badge?: number | null }[] = [
-    { title: "Pengguna", url: "/dashboard/users", icon: Users, permission: canReadUsers },
-    { title: "Notifikasi", url: "/dashboard/notifications", icon: Bell, permission: true, badge: mounted && unreadCount > 0 ? unreadCount : null },
-    { title: "Log Aktivitas", url: "/dashboard/activity", icon: Activity, permission: canReadLogs },
-  ]
-  
-  const settingsNav: { title: string, url: string, icon: React.ComponentType, permission: boolean, badge?: number | null }[] = [
-    { title: "Pengaturan", url: "/dashboard/settings", icon: Settings, permission: canReadSettings },
-    { title: "Bantuan", url: "/dashboard/help", icon: HelpCircle, permission: true },
-  ]
+  const hasPermission = (key: any) => {
+    if (key === true) return true
+    if (key === "users:read") return canReadUsers
+    if (key === "logs:read") return canReadLogs
+    if (key === "settings:read") return canReadSettings
+    if (key === "analytics:read") return canReadAnalytics
+    return false
+  }
 
-  const renderMenu = (items: { title: string, url: string, icon: React.ComponentType, permission: boolean, badge?: number | null }[]) => (
+  const getBadgeValue = (key?: string) => {
+    if (key === "notifications") return unreadCount
+    return null
+  }
+
+  const renderMenu = (items: NavItem[]) => (
     <SidebarMenu>
-      {items.filter(i => i.permission).map((item) => (
-        <SidebarMenuItem key={item.title}>
-          <SidebarMenuButton 
-            render={<Link href={item.url} />}
-            isActive={pathname === item.url || pathname.startsWith(`${item.url}/`)}
-            tooltip={item.title}
-          >
-            <item.icon />
-            <span>{item.title}</span>
-          </SidebarMenuButton>
-          {item.badge ? (
-            <SidebarMenuBadge>{item.badge > 99 ? "99+" : item.badge}</SidebarMenuBadge>
-          ) : null}
-        </SidebarMenuItem>
-      ))}
+      {items
+        .filter((i) => hasPermission(i.permissionKey))
+        .map((item) => {
+          const badgeVal = item.badgeKey ? getBadgeValue(item.badgeKey) : null
+          const Icon = item.icon
+          return (
+            <SidebarMenuItem key={item.title}>
+              <SidebarMenuButton 
+                render={<Link href={item.url} />}
+                isActive={pathname === item.url || pathname.startsWith(`${item.url}/`)}
+                tooltip={item.title}
+              >
+                <Icon />
+                <span>{item.title}</span>
+              </SidebarMenuButton>
+              {mounted && badgeVal && badgeVal > 0 ? (
+                <SidebarMenuBadge>{badgeVal > 99 ? "99+" : badgeVal}</SidebarMenuBadge>
+              ) : null}
+            </SidebarMenuItem>
+          )
+        })}
     </SidebarMenu>
   )
 
