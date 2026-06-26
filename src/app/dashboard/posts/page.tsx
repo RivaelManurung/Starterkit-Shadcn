@@ -1,15 +1,50 @@
 "use client"
 
 import * as React from "react"
-import { ArtikelFilters } from "@/features/artikel/components/ArtikelFilters"
-import { ArtikelTable } from "@/features/artikel/components/ArtikelTable"
+import dynamic from "next/dynamic"
 import { Plus, Download } from "lucide-react"
 import Link from "next/link"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { toast } from "sonner"
 import { usePostStore } from "@/stores/post-store"
 
-export default function PostsPage() {
+// Lazy load heavy components
+const ArtikelFilters = dynamic(
+  () => import("@/features/artikel/components/ArtikelFilters").then((mod) => mod.ArtikelFilters),
+  {
+    ssr: false,
+    loading: () => <div className="h-10 bg-muted/40 animate-pulse rounded-lg w-full" />,
+  }
+)
+
+const ArtikelTable = dynamic(
+  () => import("@/features/artikel/components/ArtikelTable").then((mod) => mod.ArtikelTable),
+  {
+    ssr: false,
+    loading: () => <div className="h-96 bg-muted/20 animate-pulse rounded-xl w-full" />,
+  }
+)
+
+function PostsSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border/40 pb-5">
+        <div className="space-y-2">
+          <div className="h-8 bg-muted/40 animate-pulse rounded w-48" />
+          <div className="h-4 bg-muted/40 animate-pulse rounded w-80" />
+        </div>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <div className="h-9 bg-muted/40 animate-pulse rounded w-28" />
+          <div className="h-9 bg-muted/40 animate-pulse rounded w-28" />
+        </div>
+      </div>
+      <div className="h-10 bg-muted/40 animate-pulse rounded-lg w-full" />
+      <div className="h-96 bg-muted/20 animate-pulse rounded-xl w-full" />
+    </div>
+  )
+}
+
+function PostsPageContent() {
   const posts = usePostStore((state) => state.posts)
 
   const handleExportCSV = () => {
@@ -63,5 +98,13 @@ export default function PostsPage() {
         <ArtikelTable />
       </div>
     </div>
+  )
+}
+
+export default function PostsPage() {
+  return (
+    <React.Suspense fallback={<PostsSkeleton />}>
+      <PostsPageContent />
+    </React.Suspense>
   )
 }

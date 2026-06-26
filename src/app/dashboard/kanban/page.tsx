@@ -1,6 +1,42 @@
-import { KanbanBoard } from "@/features/kanban/components/KanbanBoard"
+"use client"
 
-export default function KanbanPage() {
+import * as React from "react"
+import dynamic from "next/dynamic"
+
+const KanbanBoard = dynamic(
+  () => import("@/features/kanban/components/KanbanBoard").then((mod) => mod.KanbanBoard),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 animate-pulse">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="bg-muted/10 border border-border/20 rounded-xl p-4 min-h-[300px]">
+            <div className="h-5 bg-muted/40 rounded w-24 mb-4" />
+          </div>
+        ))}
+      </div>
+    ),
+  }
+)
+
+function KanbanSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="border-b border-border/40 pb-5">
+        <div className="h-8 bg-muted/40 animate-pulse rounded w-48 mb-2" />
+        <div className="h-4 bg-muted/40 animate-pulse rounded w-80" />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 animate-pulse">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="bg-muted/10 border border-border/20 rounded-xl p-4 min-h-[300px]" />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function KanbanPageContent() {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="border-b border-border/40 pb-5">
@@ -16,3 +52,12 @@ export default function KanbanPage() {
     </div>
   )
 }
+
+export default function KanbanPage() {
+  return (
+    <React.Suspense fallback={<KanbanSkeleton />}>
+      <KanbanPageContent />
+    </React.Suspense>
+  )
+}
+

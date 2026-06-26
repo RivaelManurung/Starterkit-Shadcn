@@ -40,7 +40,12 @@ import {
 } from "@/components/ui/select"
 import { ConfirmDelete } from "@/components/shared/confirm-delete"
 import { usePenggunaFilters } from "../hooks/usePenggunaFilters"
-import { EditRoleModal } from "./EditRoleModal"
+import dynamic from "next/dynamic"
+
+const EditRoleModal = dynamic(
+  () => import("./EditRoleModal").then((mod) => mod.EditRoleModal),
+  { ssr: false }
+)
 import { toast } from "sonner"
 
 export function PenggunaTable() {

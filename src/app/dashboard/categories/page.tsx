@@ -1,8 +1,8 @@
 "use client"
 
 import * as React from "react"
+import dynamic from "next/dynamic"
 import { useCategoryStore } from "@/stores/category-store"
-import { DataTable } from "@/components/shared/data-table"
 import { ColumnDef } from "@tanstack/react-table"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { MoreHorizontal, Plus } from "lucide-react"
@@ -21,7 +21,30 @@ import { Category } from "@/types"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
-export default function CategoriesPage() {
+const DataTable = dynamic(
+  () => import("@/components/shared/data-table").then((mod) => mod.DataTable),
+  {
+    ssr: false,
+    loading: () => <div className="h-96 bg-muted/20 animate-pulse rounded-xl w-full" />,
+  }
+) as any
+
+function CategoriesSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="space-y-2">
+          <div className="h-8 bg-muted/40 animate-pulse rounded w-48" />
+          <div className="h-4 bg-muted/40 animate-pulse rounded w-80" />
+        </div>
+        <div className="h-9 bg-muted/40 animate-pulse rounded w-36" />
+      </div>
+      <div className="h-96 bg-muted/20 animate-pulse rounded-xl w-full" />
+    </div>
+  )
+}
+
+function CategoriesPageContent() {
   const categories = useCategoryStore(state => state.categories)
   const deleteCategory = useCategoryStore(state => state.deleteCategory)
   const router = useRouter()
@@ -96,7 +119,7 @@ export default function CategoriesPage() {
   ]
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Kategori</h1>
@@ -114,3 +137,12 @@ export default function CategoriesPage() {
     </div>
   )
 }
+
+export default function CategoriesPage() {
+  return (
+    <React.Suspense fallback={<CategoriesSkeleton />}>
+      <CategoriesPageContent />
+    </React.Suspense>
+  )
+}
+

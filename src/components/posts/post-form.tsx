@@ -19,7 +19,14 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { RichTextEditor } from "@/components/editor/RichTextEditor"
+import dynamic from "next/dynamic"
+const RichTextEditor = dynamic(
+  () => import("@/components/editor/RichTextEditor").then((mod) => mod.RichTextEditor),
+  {
+    ssr: false,
+    loading: () => <div className="h-64 bg-muted/20 animate-pulse rounded-lg w-full" />,
+  }
+)
 import {
   Select,
   SelectContent,

@@ -1,16 +1,32 @@
 "use client"
 
 import * as React from "react"
+import dynamic from "next/dynamic"
 import { usePostStore } from "@/stores/post-store"
 import { useAnalitikPeriod } from "@/features/analitik/hooks/useAnalitikPeriod"
 import { AnalitikOverview } from "@/features/analitik/components/AnalitikOverview"
-import { ViewsTrendChart } from "@/features/analitik/components/ViewsTrendChart"
-import { ViewsPerKategoriChart } from "@/features/analitik/components/ViewsPerKategoriChart"
 import { TopArtikelTable } from "@/features/analitik/components/TopArtikelTable"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { format } from "date-fns"
 import { id as idLocale } from "date-fns/locale"
 import { Post } from "@/types"
+
+// Dynamic imports for chart components with ssr disabled
+const ViewsTrendChart = dynamic(
+  () => import("@/features/analitik/components/ViewsTrendChart").then((mod) => mod.ViewsTrendChart),
+  {
+    ssr: false,
+    loading: () => <div className="h-80 bg-muted/20 animate-pulse rounded-xl w-full" />,
+  }
+)
+
+const ViewsPerKategoriChart = dynamic(
+  () => import("@/features/analitik/components/ViewsPerKategoriChart").then((mod) => mod.ViewsPerKategoriChart),
+  {
+    ssr: false,
+    loading: () => <div className="h-80 bg-muted/20 animate-pulse rounded-xl w-full" />,
+  }
+)
 
 // Seed-based random generator to ensure stable, deterministic variation
 function pseudoRand(str: string) {
@@ -22,7 +38,7 @@ function pseudoRand(str: string) {
   return x - Math.floor(x)
 }
 
-export default function AnalyticsPage() {
+function AnalyticsPageContent() {
   const posts = usePostStore((state) => state.posts)
   const [period, setPeriod] = useAnalitikPeriod()
   
@@ -288,5 +304,38 @@ export default function AnalyticsPage() {
       {/* Top 10 Articles Table */}
       <TopArtikelTable isLoading={showLoader} data={periodStats.topPosts} />
     </div>
+  )
+}
+
+function AnalyticsSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border/40 pb-5">
+        <div className="space-y-2">
+          <div className="h-8 bg-muted/40 animate-pulse rounded w-48" />
+          <div className="h-4 bg-muted/40 animate-pulse rounded w-80" />
+        </div>
+        <div className="h-10 bg-muted/40 animate-pulse rounded w-[360px]" />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="h-28 bg-muted/20 animate-pulse rounded-xl" />
+        <div className="h-28 bg-muted/20 animate-pulse rounded-xl" />
+        <div className="h-28 bg-muted/20 animate-pulse rounded-xl" />
+        <div className="h-28 bg-muted/20 animate-pulse rounded-xl" />
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="h-80 bg-muted/20 animate-pulse rounded-xl" />
+        <div className="h-80 bg-muted/20 animate-pulse rounded-xl" />
+      </div>
+      <div className="h-96 bg-muted/20 animate-pulse rounded-xl" />
+    </div>
+  )
+}
+
+export default function AnalyticsPage() {
+  return (
+    <React.Suspense fallback={<AnalyticsSkeleton />}>
+      <AnalyticsPageContent />
+    </React.Suspense>
   )
 }

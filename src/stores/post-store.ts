@@ -60,7 +60,7 @@ const defaultFilters: PostFilters = {
 export const usePostStore = create<PostState>()(
   persist(
     (set, get) => ({
-      posts: mockPosts,
+      posts: mockPosts.slice(0, 10),
       filters: defaultFilters,
       viewMode: "table",
       

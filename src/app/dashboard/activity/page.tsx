@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { LogTable } from "@/features/log-aktivitas/components/LogTable"
+import dynamic from "next/dynamic"
 import { Button } from "@/components/ui/button"
 import { ConfirmDelete } from "@/components/shared/confirm-delete"
 import { useActivityStore } from "@/stores/activity-store"
@@ -10,7 +10,34 @@ import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { Trash2 } from "lucide-react"
 
-export default function ActivityPage() {
+// Lazy load heavy components
+const LogTable = dynamic(
+  () => import("@/features/log-aktivitas/components/LogTable").then((mod) => mod.LogTable),
+  {
+    ssr: false,
+    loading: () => <div className="h-96 bg-muted/20 animate-pulse rounded-xl w-full" />,
+  }
+)
+
+function ActivitySkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border/40 pb-5">
+        <div className="space-y-2">
+          <div className="h-8 bg-muted/40 animate-pulse rounded w-48" />
+          <div className="h-4 bg-muted/40 animate-pulse rounded w-80" />
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="h-5 bg-muted/40 animate-pulse rounded w-20" />
+          <div className="h-9 bg-muted/40 animate-pulse rounded w-32" />
+        </div>
+      </div>
+      <div className="h-96 bg-muted/20 animate-pulse rounded-xl w-full" />
+    </div>
+  )
+}
+
+function ActivityPageContent() {
   const clearLogs = useActivityStore((state) => state.clearOldLogs)
   const [autoRefresh, setAutoRefresh] = React.useState(true)
 
@@ -58,3 +85,12 @@ export default function ActivityPage() {
     </div>
   )
 }
+
+export default function ActivityPage() {
+  return (
+    <React.Suspense fallback={<ActivitySkeleton />}>
+      <ActivityPageContent />
+    </React.Suspense>
+  )
+}
+
